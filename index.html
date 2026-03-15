@@ -3511,11 +3511,13 @@ function fin_printSection(section) {
   const d = FIN_DATA;
   const ORG_NAME = 'Wadhwani AI';
   const PERIOD_NAME = 'FY 2025–26';
+  const ccy = FIN_FX_RATE > 0 ? `USD (₹${FIN_FX_RATE}/$)` : 'INR';
+  const amtLine = `${ORG_NAME} &nbsp;·&nbsp; ${PERIOD_NAME} &nbsp;·&nbsp; Amounts in ${ccy}`;
 
-  // Build HTML for each section
+  // Build HTML in parent window (uses live fin_miniTable + fin_inr with FX applied)
   function bsHTML() {
     return `<h2 style="font-family:'DM Serif Display',serif;font-size:20px;margin:0 0 4px;">Balance Sheet</h2>
-    <p style="font-size:12px;color:#666;margin:0 0 16px;">${ORG_NAME} &nbsp;·&nbsp; ${PERIOD_NAME} &nbsp;·&nbsp; Amounts in INR</p>
+    <p style="font-size:12px;color:#666;margin:0 0 16px;">${amtLine}</p>
     ${fin_miniTable([
       {lbl:'SOURCES OF FUNDS', t:'s'},
       {lbl:'Unrestricted Funds', note:'3', vals:d.n3Total},
@@ -3540,7 +3542,7 @@ function fin_printSection(section) {
 
   function ieHTML() {
     return `<h2 style="font-family:'DM Serif Display',serif;font-size:20px;margin:0 0 4px;">Income &amp; Expenditure Account</h2>
-    <p style="font-size:12px;color:#666;margin:0 0 16px;">${ORG_NAME} &nbsp;·&nbsp; ${PERIOD_NAME} &nbsp;·&nbsp; Amounts in INR</p>
+    <p style="font-size:12px;color:#666;margin:0 0 16px;">${amtLine}</p>
     ${fin_miniTable([
       {lbl:'INCOME', t:'s'},
       {lbl:'Donation & Grants',   vals:d.grants},
@@ -3562,9 +3564,10 @@ function fin_printSection(section) {
   }
 
   function scHTML() {
+    // Use the live rendered DOM table — already converted by fin_inr with FX rate
     const tbl = document.getElementById('sc-t');
     return `<h2 style="font-family:'DM Serif Display',serif;font-size:20px;margin:0 0 4px;">Notes to Financial Statements — Schedules 3–11</h2>
-    <p style="font-size:12px;color:#666;margin:0 0 16px;">${ORG_NAME} &nbsp;·&nbsp; ${PERIOD_NAME} &nbsp;·&nbsp; Amounts in INR</p>
+    <p style="font-size:12px;color:#666;margin:0 0 16px;">${amtLine}</p>
     ${tbl ? tbl.outerHTML : ''}`;
   }
 
