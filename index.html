@@ -13,13 +13,18 @@
 body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;}
 
 /* ── UPLOAD ── */
-#upload-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;background:var(--paper);position:relative;overflow:hidden;}
-#upload-screen::before{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(200,64,12,.08),transparent 70%);pointer-events:none;}
-#upload-screen::after{content:'';position:absolute;bottom:-80px;left:-80px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(26,107,74,.07),transparent 70%);pointer-events:none;}
-.upload-logo{font-family:'DM Serif Display',serif;font-size:14px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:60px;}
-.upload-title{font-family:'DM Serif Display',serif;font-size:clamp(36px,6vw,72px);line-height:1.1;text-align:center;max-width:700px;margin-bottom:16px;}
-.upload-title em{font-style:italic;color:var(--accent);}
-.upload-sub{font-size:16px;color:var(--muted);font-weight:300;margin-bottom:56px;text-align:center;}
+#upload-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;background:#080b14;position:relative;overflow:hidden;}
+#upload-screen .grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(46,160,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(46,160,255,.06) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;}
+#upload-screen .glow-bg{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(46,160,255,.1) 0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+#upload-screen .corner{position:absolute;width:22px;height:22px;border-color:rgba(46,160,255,.35);border-style:solid;}
+#upload-screen .c-tl{top:20px;left:20px;border-width:1px 0 0 1px;}
+#upload-screen .c-tr{top:20px;right:20px;border-width:1px 1px 0 0;}
+#upload-screen .c-bl{bottom:20px;left:20px;border-width:0 0 1px 1px;}
+#upload-screen .c-br{bottom:20px;right:20px;border-width:0 1px 1px 0;}
+.upload-logo{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#2ea0ff;border:1px solid rgba(46,160,255,.3);padding:5px 16px;border-radius:99px;margin-bottom:24px;}
+.upload-title{font-family:'DM Serif Display',serif;font-size:clamp(28px,4vw,48px);line-height:1.1;text-align:center;max-width:600px;margin-bottom:8px;color:#fff;}
+.upload-title em{font-style:italic;color:#2ea0ff;}
+.upload-sub{font-size:12px;color:rgba(255,255,255,.35);font-weight:400;margin-bottom:32px;text-align:center;letter-spacing:.08em;text-transform:uppercase;}
 .drop-zone{width:100%;max-width:520px;border:2px dashed var(--border);border-radius:16px;padding:60px 40px;text-align:center;cursor:pointer;transition:all .25s;background:var(--card);position:relative;}
 .drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:#fff8f5;transform:translateY(-2px);box-shadow:0 12px 40px rgba(200,64,12,.1);}
 .drop-icon{font-size:48px;margin-bottom:20px;display:block;}
@@ -30,8 +35,8 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
 .btn-upload:hover{background:#a33208;}
 .formats{margin-top:20px;font-size:12px;color:var(--muted);}
 .formats span{font-family:'DM Mono',monospace;background:var(--cream);padding:2px 8px;border-radius:4px;margin:0 3px;}
-#loading-bar{display:none;width:100%;max-width:520px;margin-top:24px;}
-.loading-text{font-size:14px;color:var(--muted);margin-bottom:10px;text-align:center;}
+#loading-bar{display:none;width:100%;max-width:200px;margin-top:16px;}
+.loading-text{font-size:11px;color:rgba(255,255,255,.35);margin-bottom:8px;text-align:center;letter-spacing:.06em;text-transform:uppercase;}
 .loading-track{height:4px;background:var(--cream);border-radius:99px;overflow:hidden;}
 .loading-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:99px;animation:loading-anim 1.5s ease-in-out infinite;width:40%;}
 @keyframes loading-anim{0%{transform:translateX(-200%)}100%{transform:translateX(350%)}}
@@ -236,23 +241,36 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
   .chart-wrap-pie { height: 380px; }
   .dash-logo span { display: none; }
 }
-.upload-btn-row{display:flex;gap:20px;justify-content:center;margin:32px auto 12px;flex-wrap:wrap;}
+.upload-btn-row{display:none;}
 .btn-load-repo,.btn-load-manual{display:flex;flex-direction:column;align-items:center;gap:6px;width:200px;padding:24px 20px;border-radius:16px;cursor:pointer;transition:all .2s;border:2px solid var(--border);background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.06);}
 .btn-load-repo:hover{border-color:var(--accent2);box-shadow:0 6px 20px rgba(26,107,74,.15);transform:translateY(-2px);}
 .btn-load-manual:hover{border-color:var(--accent);box-shadow:0 6px 20px rgba(200,64,12,.15);transform:translateY(-2px);}
 .btn-icon{font-size:28px;line-height:1;color:var(--accent);font-weight:300;}
 .btn-label{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:var(--ink);}
 .btn-desc{font-family:'Sora',sans-serif;font-size:12px;color:var(--muted);}
-.drive-status{text-align:center;font-size:13px;color:var(--muted);min-height:20px;margin:8px 0;}
-.drive-status.error{color:#c8400c;}
+.drive-status{text-align:center;font-size:12px;color:rgba(255,255,255,.4);min-height:20px;margin:6px 0;letter-spacing:.04em;}
+.drive-status.error{color:#ff6b6b;}
 
 /* ── FINANCIALS TAB ── */
 
 
 /* ── UPLOAD ── */
-#fin-upload-screen{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;background:var(--paper);position:relative;overflow:hidden;}
-#fin-upload-screen::before{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(200,64,12,.08),transparent 70%);pointer-events:none;}
-#fin-upload-screen::after{content:'';position:absolute;bottom:-80px;left:-80px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(26,107,74,.07),transparent 70%);pointer-events:none;}
+#fin-upload-screen{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;background:#080b14;position:relative;overflow:hidden;}
+#fin-upload-screen .grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(46,160,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(46,160,255,.06) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;}
+#fin-upload-screen .glow-bg{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(46,160,255,.1) 0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+#fin-upload-screen .corner{position:absolute;width:22px;height:22px;border-color:rgba(46,160,255,.35);border-style:solid;}
+#fin-upload-screen .c-tl{top:16px;left:16px;border-width:1px 0 0 1px;}
+#fin-upload-screen .c-tr{top:16px;right:16px;border-width:1px 1px 0 0;}
+#fin-upload-screen .c-bl{bottom:16px;left:16px;border-width:0 0 1px 1px;}
+#fin-upload-screen .c-br{bottom:16px;right:16px;border-width:0 1px 1px 0;}
+#fin-upload-screen .fin-badge{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#2ea0ff;border:1px solid rgba(46,160,255,.3);padding:5px 16px;border-radius:99px;margin-bottom:20px;}
+#fin-upload-screen .fin-title{font-family:'DM Serif Display',serif;font-size:clamp(22px,3vw,36px);color:#fff;margin:0 0 8px;text-align:center;line-height:1.1;}
+#fin-upload-screen .fin-title em{font-style:italic;color:#2ea0ff;}
+#fin-upload-screen .fin-sub{font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.08em;text-transform:uppercase;margin-bottom:24px;}
+#fin-upload-screen .fin-bar-wrap{width:160px;}
+#fin-upload-screen .fin-bar-label{font-size:11px;color:rgba(255,255,255,.35);text-align:center;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
+#fin-upload-screen .fin-bar-track{height:2px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden;}
+#fin-upload-screen .fin-bar-fill{height:100%;background:#2ea0ff;border-radius:99px;animation:fill-anim 1.5s ease-in-out infinite;width:40%;}
 .upload-logo{font-family:'DM Serif Display',serif;font-size:14px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:60px;}
 .upload-title{font-family:'DM Serif Display',serif;font-size:clamp(36px,6vw,72px);line-height:1.1;text-align:center;max-width:700px;margin-bottom:16px;}
 .upload-title em{font-style:italic;color:var(--accent);}
@@ -280,8 +298,8 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
 .formats span{font-family:'DM Mono',monospace;background:var(--cream);padding:2px 8px;border-radius:4px;margin:0 3px;}
 #loading-bar{display:none;width:100%;max-width:520px;margin-top:24px;}
 .loading-text{font-size:14px;color:var(--muted);margin-bottom:10px;text-align:center;}
-.loading-track{height:4px;background:var(--cream);border-radius:99px;overflow:hidden;}
-.loading-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:99px;animation:fill-anim 1.5s ease-in-out infinite;width:40%;}
+.loading-track{height:2px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden;}
+.loading-fill{height:100%;background:#2ea0ff;border-radius:99px;animation:fill-anim 1.5s ease-in-out infinite;width:40%;}
 @keyframes fill-anim{0%{transform:translateX(-200%)}100%{transform:translateX(350%)}}
 
 /* ── DASHBOARD ── */
@@ -386,27 +404,21 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
 
 <!-- ══ UPLOAD ══ -->
 <div id="upload-screen">
-  <div class="upload-logo">LEHS Expense Dashboard</div>
-  <h1 class="upload-title">Turn your spreadsheet into an <em>interactive</em> dashboard</h1>
-  <p class="upload-sub">Choose how you'd like to load the report.</p>
+  <div class="grid-bg"></div>
+  <div class="glow-bg"></div>
+  <div class="corner c-tl"></div>
+  <div class="corner c-tr"></div>
+  <div class="corner c-bl"></div>
+  <div class="corner c-br"></div>
 
-  <div class="upload-btn-row">
-    <button class="btn-load-repo" onclick="loadFromDrive()">
-      <span class="btn-icon">&#8593;</span>
-      <span class="btn-label">Load from Repository</span>
-      <span class="btn-desc">Auto-fetch latest report</span>
-    </button>
-    <button class="btn-load-manual" onclick="document.getElementById('file-input').click()">
-      <span class="btn-icon">&#8679;</span>
-      <span class="btn-label">Manual Upload</span>
-      <span class="btn-desc">Upload from your device</span>
-    </button>
-  </div>
+  <div class="upload-logo">LEHS · Wadhwani AI</div>
+  <h1 class="upload-title">Expense <em>Dashboard</em></h1>
+  <p class="upload-sub">Financial Intelligence Platform</p>
 
   <input type="file" id="file-input" accept=".xlsx,.xls,.csv" style="display:none">
   <p class="drive-status" id="drive-status"></p>
-  <div id="loading-bar">
-    <div class="loading-text" id="loading-text">Reading your data…</div>
+  <div id="loading-bar" style="display:block;">
+    <div class="loading-text" id="loading-text">Loading…</div>
     <div class="loading-track"><div class="loading-fill"></div></div>
   </div>
 </div>
@@ -418,7 +430,7 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
     <div class="header-right">
       <button class="btn-refresh" id="btn-refresh" onclick="loadFromDrive()" style="display:none">🔄 Refresh</button>
       <button class="btn-mapping" onclick="openMappingModal()" title="Update Employee Mapping">👥 Update Mapping</button>
-      <button class="btn-new" onclick="resetToUpload()">New File</button>
+      <button class="btn-new" onclick="openUploadModal()">↑ New File</button>
     </div>
   </header>
 
@@ -732,50 +744,24 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
     <div style="padding:0;">
 <!-- ══ UPLOAD ══ -->
 <div id="fin-upload-screen">
-  <div class="upload-logo">LEHS Financial Statements</div>
-  <h1 class="upload-title">Turn your Trial Balance into <em>financial statements</em></h1>
-  <p class="upload-sub">Load both files from GitHub, or upload them manually.</p>
+  <div class="grid-bg"></div>
+  <div class="glow-bg"></div>
+  <div class="corner c-tl"></div>
+  <div class="corner c-tr"></div>
+  <div class="corner c-bl"></div>
+  <div class="corner c-br"></div>
 
-  <!-- REPO LOAD -->
-  <div class="upload-btn-row" style="margin-bottom:24px;">
-    <button class="btn-load-repo" onclick="fin_loadFromRepo()">
-      <span class="btn-icon">⬆</span>
-      <span class="btn-label">Load from GitHub</span>
-      <span class="btn-desc">lehs-dashboard/lehs-reports</span>
-    </button>
+  <div class="fin-badge">LEHS · Wadhwani AI</div>
+  <h1 class="fin-title">Financials <em>Dashboard</em></h1>
+  <p class="fin-sub">Financial Intelligence Platform</p>
+
+  <div class="fin-bar-wrap">
+    <div class="fin-bar-label" id="fin-lt">Loading…</div>
+    <div class="fin-bar-track"><div class="fin-bar-fill"></div></div>
   </div>
 
-  <div style="font-size:12px;color:var(--muted);margin-bottom:20px;text-align:center;letter-spacing:.06em;text-transform:uppercase;font-weight:600;">— or upload manually —</div>
-
-  <!-- MANUAL UPLOAD SLOTS -->
-  <div class="upload-files-row">
-    <div class="upload-file-slot" id="slot-tb">
-      <label>Trial Balance</label>
-      <span class="slot-name" id="tb-name">No file chosen</span>
-      <button class="btn-load-manual" style="width:auto;padding:10px 20px;flex-direction:row;gap:8px;" onclick="document.getElementById('fi-tb').click()">
-        <span style="font-size:16px;">📂</span>
-        <span class="btn-label" style="font-size:13px;">Choose TB</span>
-      </button>
-      <div class="formats">Accepts <span>.xlsx</span> <span>.xls</span></div>
-    </div>
-    <div class="upload-file-slot" id="slot-map">
-      <label>Mapping File</label>
-      <span class="slot-name" id="map-name">No file chosen</span>
-      <button class="btn-load-manual" style="width:auto;padding:10px 20px;flex-direction:row;gap:8px;" onclick="document.getElementById('fi-map').click()">
-        <span style="font-size:16px;">📂</span>
-        <span class="btn-label" style="font-size:13px;">Choose Mapping</span>
-      </button>
-      <div class="formats">Accepts <span>.xlsx</span> <span>.xls</span></div>
-    </div>
-  </div>
-
-  <button class="btn-go" id="btn-go" onclick="fin_processBothFiles()">Generate Financial Statements →</button>
-
-  <p class="drive-status" id="ds" style="margin-top:16px;"></p>
-  <div id="fin-loading-bar">
-    <div class="loading-text" id="fin-lt">Processing…</div>
-    <div class="loading-track"><div class="loading-fill"></div></div>
-  </div>
+  <p style="display:none;" id="ds"></p>
+  <div id="fin-loading-bar" style="display:none;"></div>
 
   <input type="file" id="fi-tb"  accept=".xlsx,.xls" style="display:none">
   <input type="file" id="fi-map" accept=".xlsx,.xls" style="display:none">
@@ -799,7 +785,15 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
         </div>
       </div>
       <button class="btn-new" onclick="fin_loadFromRepo()" title="Reload data from GitHub" style="margin-right:6px;">↻ Refresh</button>
-      <button class="btn-new" onclick="fin_resetToUpload()">↩ New File</button>
+      <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border-radius:8px;padding:4px 10px;margin-right:6px;" title="Enter USD/INR exchange rate to view in USD">
+        <span style="font-size:11px;color:rgba(255,255,255,.6);font-family:'DM Mono',monospace;font-weight:600;">₹/$</span>
+        <input type="number" id="fin-usd-rate" placeholder="Rate" min="1" step="0.01"
+          style="width:72px;background:transparent;border:none;outline:none;font-family:'DM Mono',monospace;font-size:13px;color:#fff;text-align:right;"
+          oninput="fin_applyFxRate()"
+          title="USD/INR exchange rate (e.g. 84)">
+        <span id="fin-fx-label" style="font-size:11px;color:rgba(255,255,255,.4);min-width:20px;">INR</span>
+      </div>
+      <button class="btn-new" onclick="openFinUploadModal()">↑ New File</button>
     </div>
   </header>
   <nav class="tab-nav">
@@ -815,12 +809,12 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px;">
       <div class="table-card" style="margin-bottom:0;">
         <div class="chart-title" style="margin-bottom:4px;">Balance Sheet Summary</div>
-        <div class="chart-sub" style="margin-bottom:16px;">Sources vs Application of Funds</div>
+        <div class="chart-sub" style="margin-bottom:16px;" id="fin-bs-sub">Sources vs Application of Funds</div>
         <div id="ov-bs"></div>
       </div>
       <div class="table-card" style="margin-bottom:0;">
         <div class="chart-title" style="margin-bottom:4px;">Income &amp; Expenditure Summary</div>
-        <div class="chart-sub" style="margin-bottom:16px;">FCRA · Non FCRA · FFS · TOTAL</div>
+        <div class="chart-sub" style="margin-bottom:16px;" id="fin-ie-sub">FCRA · Non FCRA · FFS · TOTAL</div>
         <div id="ov-ie"></div>
       </div>
     </div>
@@ -920,7 +914,7 @@ const DIM_LABEL = {
    FILE LOADING
 ═══════════════════════════════════════ */
 const fileInput = document.getElementById('file-input');
-fileInput.addEventListener('change', e => { if (e.target.files[0]) processFile(e.target.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) { closeUploadModal(); processFile(e.target.files[0]); } });
 
 function processFile(file) {
   document.getElementById('loading-bar').style.display = 'block';
@@ -2339,17 +2333,17 @@ async function loadFromDrive() {
   const loadingBar = document.getElementById('loading-bar');
   const loadingText = document.getElementById('loading-text');
 
-  if (statusEl) { statusEl.textContent = '🔍 Fetching latest report…'; statusEl.className = 'drive-status'; }
+  if (statusEl) { statusEl.textContent = ''; statusEl.className = 'drive-status'; }
   loadingBar.style.display = 'block';
-  loadingText.textContent = 'Downloading latest report…';
+  loadingText.textContent = 'Loading…';
 
   try {
     const fileName = 'Consolidated_Report_-_Apr_25.xlsx';
     // Direct raw GitHub URL — no CORS, no auth, always latest
     const rawUrl = `https://raw.githubusercontent.com/lehs-dashboard/lehs-reports/main/${fileName}`;
 
-    if (statusEl) statusEl.textContent = `📄 Downloading ${fileName}…`;
-    loadingText.textContent = `Downloading ${fileName}…`;
+    if (statusEl) statusEl.textContent = '';
+    loadingText.textContent = 'Loading…';
 
     const resp = await fetch(rawUrl);
     if (!resp.ok) throw new Error(`Download failed (${resp.status}). The file may not have been pushed to GitHub yet — please upload manually.`);
@@ -2357,7 +2351,7 @@ async function loadFromDrive() {
     const arrayBuffer = await resp.arrayBuffer();
     if (arrayBuffer.byteLength < 5000) throw new Error('File too small — something went wrong. Please upload manually.');
 
-    loadingText.textContent = 'Parsing data…';
+    loadingText.textContent = 'Loading…';
     if (statusEl) statusEl.textContent = '';
     parseArrayBuffer(arrayBuffer, fileName);
 
@@ -2382,9 +2376,48 @@ function resetToUpload() {
   document.getElementById('btn-refresh').style.display = 'none';
   const ds = document.getElementById('drive-status'); if (ds) ds.textContent = '';
   switchTab('overview');
+  // Auto-reload since there's no manual trigger on the new splash screen
+  setTimeout(() => loadFromDrive(), 300);
 }
 
-// ── AUTO LOAD ON PAGE OPEN ──
+/* ═══════════════════════════════════════
+   EXPENSE UPLOAD MODAL
+═══════════════════════════════════════ */
+function openUploadModal() {
+  document.getElementById('upload-overlay').style.display = 'block';
+  document.getElementById('upload-modal').style.display = 'block';
+}
+function closeUploadModal() {
+  document.getElementById('upload-overlay').style.display = 'none';
+  document.getElementById('upload-modal').style.display = 'none';
+}
+// File input handled by existing processFile listener above
+
+/* ═══════════════════════════════════════
+   FINANCIALS UPLOAD MODAL
+═══════════════════════════════════════ */
+function openFinUploadModal() {
+  document.getElementById('fin-upload-overlay').style.display = 'block';
+  document.getElementById('fin-upload-modal').style.display = 'block';
+}
+function closeFinUploadModal() {
+  document.getElementById('fin-upload-overlay').style.display = 'none';
+  document.getElementById('fin-upload-modal').style.display = 'none';
+}
+
+// Update slot labels and show Go button when both files chosen
+function updateFinModalSlots() {
+  const tbEl  = document.getElementById('fi-tb');
+  const mapEl = document.getElementById('fi-map');
+  const tbName  = tbEl.files[0]  ? tbEl.files[0].name  : 'No file chosen · .xlsx / .xls';
+  const mapName = mapEl.files[0] ? mapEl.files[0].name : 'No file chosen · .xlsx / .xls';
+  document.getElementById('fin-modal-tb-name').textContent  = tbName;
+  document.getElementById('fin-modal-map-name').textContent = mapName;
+  document.getElementById('fin-tb-slot').style.borderColor  = tbEl.files[0]  ? '#1a6b4a' : '#ccc7bc';
+  document.getElementById('fin-map-slot').style.borderColor = mapEl.files[0] ? '#1a6b4a' : '#ccc7bc';
+  document.getElementById('fin-modal-go').style.display = (tbEl.files[0] && mapEl.files[0]) ? 'block' : 'none';
+}
+
 window.addEventListener('load', () => {
   loadFromDrive();
 });
@@ -2392,6 +2425,58 @@ window.addEventListener('load', () => {
 
 <!-- ══ MAPPING MODAL ══ -->
 <div id="map-overlay" onclick="closeMappingModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;"></div>
+
+<!-- ══ EXPENSE UPLOAD MODAL ══ -->
+<div id="upload-overlay" onclick="closeUploadModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;"></div>
+<div id="upload-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2001;background:#f5f0e8;border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.25);width:min(92vw,440px);overflow:hidden;">
+  <div style="background:#0d0d0d;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;">
+    <div style="font-family:'DM Serif Display',serif;font-size:16px;color:#fff;">Upload Expense Report</div>
+    <button onclick="closeUploadModal()" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:20px;cursor:pointer;line-height:1;">×</button>
+  </div>
+  <div style="padding:24px;">
+    <p style="font-size:13px;color:#6b6560;margin:0 0 20px;">Select your consolidated report file to load it manually.</p>
+    <div id="exp-drop-zone" onclick="document.getElementById('file-input').click()" style="border:2px dashed #ccc7bc;border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:border-color .2s;background:#fff;" onmouseover="this.style.borderColor='#c8400c'" onmouseout="this.style.borderColor='#ccc7bc'">
+      <div style="font-size:28px;margin-bottom:8px;">📂</div>
+      <div style="font-size:14px;font-weight:600;color:#0d0d0d;margin-bottom:4px;">Click to choose file</div>
+      <div style="font-size:12px;color:#6b6560;">Accepts .xlsx · .xls · .csv</div>
+    </div>
+    <div style="margin-top:16px;text-align:center;">
+      <div style="font-size:11px;color:#b0aba4;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;">— or —</div>
+      <button onclick="closeUploadModal();loadFromDrive();" style="font-family:'Sora',sans-serif;font-size:13px;font-weight:600;background:#1a6b4a;color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;">↻ Reload from GitHub</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FINANCIALS UPLOAD MODAL ══ -->
+<div id="fin-upload-overlay" onclick="closeFinUploadModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;"></div>
+<div id="fin-upload-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2001;background:#f5f0e8;border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.25);width:min(92vw,480px);overflow:hidden;">
+  <div style="background:#0d0d0d;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;">
+    <div style="font-family:'DM Serif Display',serif;font-size:16px;color:#fff;">Upload Financials Files</div>
+    <button onclick="closeFinUploadModal()" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:20px;cursor:pointer;line-height:1;">×</button>
+  </div>
+  <div style="padding:24px;display:flex;flex-direction:column;gap:14px;">
+    <p style="font-size:13px;color:#6b6560;margin:0;">Select both files to load financials manually.</p>
+    <div onclick="document.getElementById('fi-tb').click()" id="fin-tb-slot" style="border:2px dashed #ccc7bc;border-radius:10px;padding:16px 20px;cursor:pointer;transition:border-color .2s;background:#fff;display:flex;align-items:center;gap:14px;" onmouseover="this.style.borderColor='#c8400c'" onmouseout="this.style.borderColor=document.getElementById('fi-tb').value?'#1a6b4a':'#ccc7bc'">
+      <div style="font-size:22px;">📊</div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#0d0d0d;">Trial Balance</div>
+        <div style="font-size:11px;color:#6b6560;" id="fin-modal-tb-name">No file chosen · .xlsx / .xls</div>
+      </div>
+    </div>
+    <div onclick="document.getElementById('fi-map').click()" id="fin-map-slot" style="border:2px dashed #ccc7bc;border-radius:10px;padding:16px 20px;cursor:pointer;transition:border-color .2s;background:#fff;display:flex;align-items:center;gap:14px;" onmouseover="this.style.borderColor='#c8400c'" onmouseout="this.style.borderColor=document.getElementById('fi-map').value?'#1a6b4a':'#ccc7bc'">
+      <div style="font-size:22px;">🗂</div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#0d0d0d;">Mapping File</div>
+        <div style="font-size:11px;color:#6b6560;" id="fin-modal-map-name">No file chosen · .xlsx / .xls</div>
+      </div>
+    </div>
+    <button id="fin-modal-go" onclick="closeFinUploadModal();fin_processBothFiles();" style="display:none;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;background:#c8400c;color:white;border:none;padding:12px;border-radius:8px;cursor:pointer;width:100%;">Generate Financial Statements →</button>
+    <div style="text-align:center;">
+      <div style="font-size:11px;color:#b0aba4;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;">— or —</div>
+      <button onclick="closeFinUploadModal();fin_loadFromRepo();" style="font-family:'Sora',sans-serif;font-size:13px;font-weight:600;background:#1a6b4a;color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;">↻ Reload from GitHub</button>
+    </div>
+  </div>
+</div>
 <div id="map-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2001;background:#f5f0e8;border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.25);width:min(92vw,520px);flex-direction:column;overflow:hidden;">
   <div style="padding:20px 24px 16px;border-bottom:1px solid #e0d9ce;display:flex;justify-content:space-between;align-items:center;">
     <div>
@@ -2684,6 +2769,7 @@ document.getElementById('fi-tb').addEventListener('change', e => {
   const r = new FileReader();
   r.onload = ev => { tbBuf = ev.target.result; fin_markSlot('slot-tb','tb-name', f.name); fin_checkReady(); };
   r.readAsArrayBuffer(f);
+  updateFinModalSlots();
 });
 document.getElementById('fi-map').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
@@ -2691,6 +2777,7 @@ document.getElementById('fi-map').addEventListener('change', e => {
   const r = new FileReader();
   r.onload = ev => { mapBuf = ev.target.result; fin_markSlot('slot-map','map-name', f.name); fin_checkReady(); };
   r.readAsArrayBuffer(f);
+  updateFinModalSlots();
 });
 
 function fin_markSlot(slotId, nameId, name) {
@@ -3034,8 +3121,35 @@ function fin_exportUnmapped() {
    FORMAT HELPERS
 ═══════════════════════════════════════════ */
 /* Indian number formatter — does not rely on browser locale */
+/* FX rate — set by user input; 0 = INR mode */
+let FIN_FX_RATE = 0;
+
+function fin_applyFxRate() {
+  const val = parseFloat(document.getElementById('fin-usd-rate').value);
+  FIN_FX_RATE = (!val || val <= 0) ? 0 : val;
+  const lbl = document.getElementById('fin-fx-label');
+  if (lbl) lbl.textContent = FIN_FX_RATE > 0 ? 'USD' : 'INR';
+  // Re-render everything with new rate
+  if (FIN_DATA && Object.keys(FIN_DATA).length) {
+    fin_renderKPIs();
+    fin_renderOV();
+    fin_renderSC();
+    fin_renderTBTable(document.getElementById('tb-s') ? document.getElementById('tb-s').value : '');
+    fin_showUnmatched();
+  }
+}
+
+/* Convert INR value to display currency */
+function fin_conv(v) {
+  return FIN_FX_RATE > 0 ? v / FIN_FX_RATE : v;
+}
+
 function fin_inr(n) {
-  n = Math.round(Math.abs(n));
+  n = Math.round(Math.abs(fin_conv(n)));
+  if (FIN_FX_RATE > 0) {
+    // US comma formatting for USD
+    return n.toLocaleString('en-US');
+  }
   const s = n.toString();
   if (s.length <= 3) return s;
   let result = s.slice(-3);
@@ -3045,9 +3159,16 @@ function fin_inr(n) {
   return result;
 }
 function fin_fmt(v) {
-  v = Math.round(v); const a = Math.abs(v);
-  let s = a>=1e7 ? '₹'+(a/1e7).toFixed(2)+' Cr' : a>=1e5 ? '₹'+(a/1e5).toFixed(2)+' L' : '₹'+fin_inr(a);
-  return v < 0 ? '(' + s + ')' : s;
+  const cv = fin_conv(v);
+  const av = Math.abs(cv);
+  let s;
+  if (FIN_FX_RATE > 0) {
+    s = av >= 1e6 ? '$' + (av/1e6).toFixed(2) + ' M' : av >= 1e3 ? '$' + (av/1e3).toFixed(2) + ' K' : '$' + Math.round(av).toLocaleString('en-US');
+  } else {
+    const a = Math.abs(Math.round(v));
+    s = a>=1e7 ? '₹'+(a/1e7).toFixed(2)+' Cr' : a>=1e5 ? '₹'+(a/1e5).toFixed(2)+' L' : '₹'+fin_inr(a);
+  }
+  return cv < 0 ? '(' + s + ')' : s;
 }
 function fin_C(v) {
   v = Math.round(v);
@@ -3061,12 +3182,12 @@ function fin_C(v) {
 function fin_renderKPIs() {
   const d = FIN_DATA, sp = d.surplus[3] >= 0, bal = Math.abs(d.bsDiff[3]) < 100;
   document.getElementById('fin-kpi-grid').innerHTML = [
-    { l:'Total Income',        v:fmt(d.totalIncome[3]), s:'across all funds',           c:'c1' },
-    { l:'Total Expenditure',   v:fmt(d.totalExp[3]),    s:'all line items',             c:'c2' },
-    { l:'Surplus / (Deficit)', v:fmt(d.surplus[3]),     s:sp?'surplus for year':'deficit for year', c:sp?'c2':'c1' },
-    { l:'Total Assets',        v:fmt(d.bsApp[3]),       s:'balance sheet application', c:'c3' },
-    { l:'NPO Funds',           v:fmt(d.n3Total[3]+d.n4Total[3]), s:'unrestricted + restricted', c:'c4' },
-    { l:'BS Check',            v:bal?'✓ Balanced':'⚠ Mismatch', s:bal?'sources = application':'diff: '+fmt(d.bsDiff[3]), c:bal?'c2':'c1' },
+    { l:'Total Income',        v:fin_fmt(d.totalIncome[3]), s:'across all funds',           c:'c1' },
+    { l:'Total Expenditure',   v:fin_fmt(d.totalExp[3]),    s:'all line items',             c:'c2' },
+    { l:'Surplus / (Deficit)', v:fin_fmt(d.surplus[3]),     s:sp?'surplus for year':'deficit for year', c:sp?'c2':'c1' },
+    { l:'Total Assets',        v:fin_fmt(d.bsApp[3]),       s:'balance sheet application', c:'c3' },
+    { l:'NPO Funds',           v:fin_fmt(d.n3Total[3]+d.n4Total[3]), s:'unrestricted + restricted', c:'c4' },
+    { l:'BS Check',            v:bal?'✓ Balanced':'⚠ Mismatch', s:bal?'sources = application':'diff: '+fin_fmt(d.bsDiff[3]), c:bal?'c2':'c1' },
   ].map(k=>`<div class="kpi-card ${k.c}"><div class="kpi-label">${k.l}</div><div class="kpi-value">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('');
 }
 
@@ -3108,6 +3229,12 @@ function fin_miniTable(specs) {
 
 function fin_renderOV() {
   const d = FIN_DATA;
+  const ccy = FIN_FX_RATE > 0 ? `USD (₹${FIN_FX_RATE}/$)` : 'INR';
+  const amtLabel = `Amounts in ${ccy}`;
+  const bsSub = document.getElementById('fin-bs-sub');
+  if (bsSub) bsSub.textContent = `Sources vs Application of Funds · ${amtLabel}`;
+  const ieSub = document.getElementById('fin-ie-sub');
+  if (ieSub) ieSub.textContent = `FCRA · Non FCRA · FFS · TOTAL · ${amtLabel}`;
   document.getElementById('ov-bs').innerHTML = fin_miniTable([
     {lbl:'SOURCES OF FUNDS', t:'s'},
     {lbl:'Unrestricted Funds',    note:'3',  vals:d.n3Total},
@@ -3180,6 +3307,9 @@ function fin_TR(type, lbl, vals, opts={}) {
 ═══════════════════════════════════════════ */
 function fin_renderSC() {
   const d = FIN_DATA;
+  const ccy = FIN_FX_RATE > 0 ? `USD (₹${FIN_FX_RATE}/$)` : 'INR';
+  const scSub = document.getElementById('sc-sub');
+  if (scSub) scSub.textContent = `${ORG}  ·  ${PERIOD}  ·  Amounts in ${ccy}`;
   fin_mkHead('sc-th', false);
   const Z = [0,0,0,0]; // zero row
   document.getElementById('sc-tb').innerHTML = [
@@ -3329,8 +3459,8 @@ function fin_exportTB() {
   a.download = 'Trial_Balance_with_Mapping.csv'; a.click();
 }
 
-function fin_showLoad(m){document.getElementById('fin-lt').textContent=m;document.getElementById('fin-loading-bar').style.display='block';}
-function fin_hideLoad(){document.getElementById('fin-loading-bar').style.display='none';}
+function fin_showLoad(m){const el=document.getElementById('fin-lt');if(el)el.textContent=m;}
+function fin_hideLoad(){const el=document.getElementById('fin-lt');if(el)el.textContent='Loading…';}
 
 function fin_resetToUpload(){
   document.getElementById('fin-upload-screen').style.display='flex';
@@ -3341,6 +3471,11 @@ function fin_resetToUpload(){
   if (unBtn) unBtn.textContent = '⚠ Unmapped Expenses';
   fin_hideLoad();
   tbBuf=null; mapBuf=null; tbName=''; mapName='';
+  FIN_FX_RATE = 0;
+  const rateInput = document.getElementById('fin-usd-rate');
+  if (rateInput) rateInput.value = '';
+  const fxLbl = document.getElementById('fin-fx-label');
+  if (fxLbl) fxLbl.textContent = 'INR';
   FIN_RAW=[];FIN_TOTALS={};FIN_DATA={};FIN_SPECIFIC_MAP={};FIN_SPECIFIC_MAP_LOW={};FIN_DEFAULT_MAP={};
   document.getElementById('slot-tb').classList.remove('done');
   document.getElementById('slot-map').classList.remove('done');
