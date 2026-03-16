@@ -401,6 +401,110 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
 </style>
 </head>
 <body>
+<!-- ══ PASSWORD GATE ══ -->
+<style>
+#pwd-gate{position:fixed;inset:0;background:#080b14;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;}
+#pwd-gate .pg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(46,160,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(46,160,255,.06) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;}
+#pwd-gate .pg-glow{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(46,160,255,.1) 0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+#pwd-gate .pg-corner{position:absolute;width:22px;height:22px;border-color:rgba(46,160,255,.35);border-style:solid;}
+#pwd-gate .pg-tl{top:20px;left:20px;border-width:1px 0 0 1px;}
+#pwd-gate .pg-tr{top:20px;right:20px;border-width:1px 1px 0 0;}
+#pwd-gate .pg-bl{bottom:20px;left:20px;border-width:0 0 1px 1px;}
+#pwd-gate .pg-br{bottom:20px;right:20px;border-width:0 1px 1px 0;}
+#pwd-gate .pg-box{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;}
+#pwd-gate .pg-badge{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#2ea0ff;border:1px solid rgba(46,160,255,.3);padding:5px 16px;border-radius:99px;margin-bottom:20px;}
+#pwd-gate .pg-title{font-family:'DM Serif Display',serif;font-size:clamp(28px,4vw,42px);color:#fff;margin:0 0 6px;text-align:center;}
+#pwd-gate .pg-title em{font-style:italic;color:#2ea0ff;}
+#pwd-gate .pg-sub{font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.08em;text-transform:uppercase;margin-bottom:36px;}
+#pwd-gate .pg-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px 36px;display:flex;flex-direction:column;gap:14px;min-width:300px;}
+#pwd-gate .pg-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:-6px;}
+#pwd-gate .pg-input{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:12px 16px;font-size:15px;color:#fff;font-family:'DM Mono',monospace;letter-spacing:.1em;outline:none;transition:border-color .2s;}
+#pwd-gate .pg-input:focus{border-color:#2ea0ff;}
+#pwd-gate .pg-btn{background:#2ea0ff;color:#fff;border:none;border-radius:8px;padding:13px;font-family:'Sora',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s;}
+#pwd-gate .pg-btn:hover{background:#1a8de8;}
+#pwd-gate .pg-err{font-size:12px;color:#ff6b6b;text-align:center;min-height:16px;display:none;}
+#pwd-gate .pg-err.show{display:block;}
+</style>
+
+<div id="pwd-gate">
+  <div class="pg-grid"></div>
+  <div class="pg-glow"></div>
+  <div class="pg-corner pg-tl"></div>
+  <div class="pg-corner pg-tr"></div>
+  <div class="pg-corner pg-bl"></div>
+  <div class="pg-corner pg-br"></div>
+  <div class="pg-box">
+    <div class="pg-badge">LEHS · Wadhwani AI</div>
+    <h1 class="pg-title">LEHS <em>Dashboard</em></h1>
+    <p class="pg-sub">Restricted Access</p>
+    <div class="pg-card">
+      <div class="pg-label">Password</div>
+      <input class="pg-input" id="pg-pwd" type="password" placeholder="Enter password" onkeydown="if(event.key==='Enter')pgCheck()">
+      <button class="pg-btn" onclick="pgCheck()">Access Dashboard →</button>
+      <div class="pg-err" id="pg-err">Incorrect password. Please try again.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const _ADMIN_H = 'af693f3455e416fcbf93abada6b65605d1a4fa9dbdbfea9bee5981ab403b2602';
+const _USER_H  = 'abc23ba941557fc9ad8379c988db4bf3dab29d41d63f123e9513589476bfd9f1';
+const _RESTRICTED_TABS = ['tab-vendorpivot', 'tab-personnelpivot', 'tab-financials'];
+
+(function() {
+  const role = sessionStorage.getItem('lehs_role');
+  if (role === 'admin' || role === 'user') {
+    document.getElementById('pwd-gate').style.display = 'none';
+    if (role === 'user') applyUserRestrictions();
+  }
+})();
+
+function applyUserRestrictions() {
+  // Hide restricted whole tabs
+  _RESTRICTED_TABS.forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.style.display = 'none';
+    const page = document.getElementById('page-' + id.replace('tab-',''));
+    if (page) page.style.display = 'none';
+  });
+  // Hide only Cost by Designation inside Personnel Cost Analysis
+  const desig = document.getElementById('desig-cost-card');
+  if (desig) desig.style.display = 'none';
+  // If currently on a restricted tab, switch to overview
+  const active = document.querySelector('.tab-btn.active');
+  if (active && _RESTRICTED_TABS.includes(active.id)) switchTab('overview');
+}
+
+async function pgCheck() {
+  const input = document.getElementById('pg-pwd').value;
+  const err   = document.getElementById('pg-err');
+  if (!input) { err.className='pg-err show'; err.textContent='Please enter the password.'; return; }
+
+  const encoder = new TextEncoder();
+  const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(input));
+  const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,'0')).join('');
+
+  if (hashHex === _ADMIN_H) {
+    sessionStorage.setItem('lehs_role','admin');
+    document.getElementById('pwd-gate').style.display = 'none';
+  } else if (hashHex === _USER_H) {
+    sessionStorage.setItem('lehs_role','user');
+    document.getElementById('pwd-gate').style.display = 'none';
+    applyUserRestrictions();
+  } else {
+    err.className = 'pg-err show';
+    err.textContent = 'Incorrect password. Please try again.';
+    document.getElementById('pg-pwd').value = '';
+    document.getElementById('pg-pwd').focus();
+    const card = document.querySelector('.pg-card');
+    card.style.transform='translateX(-8px)';
+    setTimeout(()=>{card.style.transform='translateX(8px)';},100);
+    setTimeout(()=>{card.style.transform='translateX(-4px)';},200);
+    setTimeout(()=>{card.style.transform='translateX(0)';},300);
+  }
+}
+</script>
+
 
 <!-- ══ UPLOAD ══ -->
 <div id="upload-screen">
@@ -699,7 +803,7 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
     <div class="dash-body">
 
       <!-- Table 1: Cost by Department -->
-      <div class="table-card" style="margin-bottom:24px;">
+      <div class="table-card" id="dept-cost-card" style="margin-bottom:24px;">
         <div class="table-header-row">
           <div>
             <div class="chart-title">Cost by Department</div>
@@ -719,7 +823,7 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
       </div>
 
       <!-- Table 2: Cost by Designation -->
-      <div class="table-card">
+      <div class="table-card" id="desig-cost-card">
         <div class="table-header-row">
           <div>
             <div class="chart-title">Cost by Designation</div>
