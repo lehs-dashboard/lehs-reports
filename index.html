@@ -1,3 +1,4 @@
+<script>if(window.innerWidth<=768||/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)){window.location.replace("mobile.html");}</script>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -303,7 +304,7 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
 @keyframes fill-anim{0%{transform:translateX(-200%)}100%{transform:translateX(350%)}}
 
 /* ── DASHBOARD ── */
-#fin-dashboard{display:none;}
+/* #fin-dashboard visibility controlled entirely by JS */
 .dash-header{background:var(--ink);color:white;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200;}
 .dash-logo{font-family:'DM Serif Display',serif;font-size:18px;letter-spacing:.05em;}
 .dash-logo span{color:var(--accent);font-style:italic;}
@@ -398,6 +399,24 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
   .tab-btn{font-size:10px;padding:10px 8px;}
 }
 
+
+/* ── SIDEBAR LAYOUT (added) ── */
+#dashboard{flex-direction:row !important;}
+.dash-sidebar{width:220px;min-height:100vh;background:#0d0d0d;border-right:2px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;overflow-y:auto;}
+.dash-main{margin-left:220px;flex:1;min-width:0;}
+.dash-sidebar-logo{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.1);}
+.dash-logo-main{font-family:'DM Serif Display',serif;font-size:16px;color:#fff;}
+.dash-logo-main span{color:var(--accent);font-style:italic;}
+.dash-logo-sub{font-size:9px;color:rgba(255,255,255,.4);letter-spacing:.1em;text-transform:uppercase;margin-top:3px;}
+.dash-sidebar-nav{padding:10px 8px;flex:1;display:flex;flex-direction:column;gap:1px;}
+.dash-sidebar-section{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.25);padding:14px 10px 5px;}
+/* Hide the expense top nav only */
+#dashboard > .dash-main > .tab-nav{display:none !important;}
+/* Sidebar tab buttons */
+.dash-sidebar-nav .tab-btn{font-family:'Sora',sans-serif;font-size:12px;font-weight:600;padding:9px 12px;border:1px solid transparent;border-radius:7px;background:transparent;cursor:pointer;color:rgba(255,255,255,.45);transition:all .18s;display:flex;align-items:center;gap:8px;width:100%;text-align:left;white-space:nowrap;}
+.dash-sidebar-nav .tab-btn:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.07);}
+.dash-sidebar-nav .tab-btn.active{background:rgba(200,64,12,.15);color:var(--accent);border-color:rgba(200,64,12,.3);}
+@media(max-width:900px){.dash-sidebar{width:180px;}.dash-main{margin-left:180px;}}
 </style>
 </head>
 <body>
@@ -528,7 +547,29 @@ async function pgCheck() {
 </div>
 
 <!-- ══ DASHBOARD ══ -->
-<div id="dashboard">
+<div id="dashboard" style="display:none;flex-direction:row;">
+  <!-- SIDEBAR -->
+  <aside class="dash-sidebar">
+    <div class="dash-sidebar-logo">
+      <div class="dash-logo-main">LEHS <span>Dashboard</span></div>
+      <div class="dash-logo-sub">Wadhwani AI · FY 2025–26</div>
+    </div>
+    <nav class="dash-sidebar-nav">
+      <div class="dash-sidebar-section">Expense</div>
+      <button class="tab-btn active" onclick="switchTab('overview')" id="tab-overview">📈 Overview & Charts</button>
+      <button class="tab-btn" onclick="switchTab('pivot')" id="tab-pivot">📊 Budget Line Item</button>
+      <button class="tab-btn" onclick="switchTab('vendorpivot')" id="tab-vendorpivot">👤 Consultant/Intern</button>
+      <button class="tab-btn" onclick="switchTab('personnelpivot')" id="tab-personnelpivot">👥 Personnel Details</button>
+      <button class="tab-btn" onclick="switchTab('allvendorpivot')" id="tab-allvendorpivot">🏢 Vendors Details</button>
+      <button class="tab-btn" onclick="switchTab('personnelcost')" id="tab-personnelcost">💼 Cost Analysis</button>
+      <button class="tab-btn" onclick="switchTab('transactions')" id="tab-transactions">🗂 Transactions</button>
+      <div class="dash-sidebar-section">Finance</div>
+      <button class="tab-btn" onclick="switchTab('financials')" id="tab-financials">📋 Financial Statements</button>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="dash-main">
   <header class="dash-header">
     <div class="dash-logo">LEHS <span>Expense Dashboard</span></div>
     <div class="header-right">
@@ -537,17 +578,7 @@ async function pgCheck() {
       <button class="btn-new" onclick="openUploadModal()">↑ New File</button>
     </div>
   </header>
-
-  <nav class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('overview')" id="tab-overview">📈 Overview &amp; Charts</button>
-    <button class="tab-btn" onclick="switchTab('pivot')" id="tab-pivot">📊 Budget Line Item Spent</button>
-    <button class="tab-btn" onclick="switchTab('vendorpivot')" id="tab-vendorpivot">👤 Consultant/Intern Details</button>
-    <button class="tab-btn" onclick="switchTab('personnelpivot')" id="tab-personnelpivot">👥 Personnel Details</button>
-    <button class="tab-btn" onclick="switchTab('allvendorpivot')" id="tab-allvendorpivot">🏢 Vendors Details</button>
-    <button class="tab-btn" onclick="switchTab('personnelcost')" id="tab-personnelcost">💼 Personnel Cost Analysis</button>
-    <button class="tab-btn" onclick="switchTab('transactions')" id="tab-transactions">🗂 Transaction Details</button>
-    <button class="tab-btn" onclick="switchTab('financials')" id="tab-financials">📋 Financial Statements</button>
-  </nav>
+  <nav class="tab-nav"></nav>
 
   <!-- PAGE 1 -->
   <div class="tab-page active" id="page-overview">
@@ -845,8 +876,6 @@ async function pgCheck() {
     </div>
   </div>
   <div class="tab-page" id="page-financials">
-    <div style="padding:0;">
-<!-- ══ UPLOAD ══ -->
 <div id="fin-upload-screen">
   <div class="grid-bg"></div>
   <div class="glow-bg"></div>
@@ -872,7 +901,7 @@ async function pgCheck() {
 </div>
 
 <!-- ══ DASHBOARD ══ -->
-<div id="fin-dashboard">
+<div id="fin-dashboard" style="display:none;">
   <header class="dash-header">
     <div class="dash-logo">LEHS <span>Financial Statements</span></div>
     <div class="header-right">
@@ -976,10 +1005,10 @@ async function pgCheck() {
       <div id="un-area"></div>
     </div>
   </div></div>
-</div>
-    </div>
-  </div>
-</div>
+</div><!-- /fin-dashboard -->
+</div><!-- /page-financials -->
+</div><!-- /dash-main -->
+</div><!-- /dashboard -->
 
 <script>
 /* ═══════════════════════════════════════
@@ -1121,6 +1150,7 @@ function parseArrayBuffer(arrayBuffer, fileName) {
       const fb = document.getElementById('file-badge'); if (fb) fb.textContent = fileName;
       document.getElementById('btn-refresh').style.display = 'inline-block';
       document.getElementById('upload-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'flex';
       document.getElementById('dashboard').style.display = 'block';
       initDashboard();
   } catch (err) {
@@ -1656,8 +1686,8 @@ function makeMonthlyBar(id, agg) {
         tooltip: { callbacks: { label: c => fmt(c.raw) } }
       },
       scales: {
-        x: { grid: { color: '#f0ece4' }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#6b6560' } },
-        y: { grid: { color: '#f0ece4' }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#6b6560', callback: v => fmt(v) } }
+        x: { grid: { display: false }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#6b6560' } },
+        y: { grid: { display: false }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#6b6560', callback: v => fmt(v) } }
       }
     },
     plugins: [barLabelPlugin]
@@ -1698,8 +1728,8 @@ function makeBarH(id, agg, dim) {
         tooltip: { callbacks: { label: c => fmt(c.raw) } }
       },
       scales: {
-        x: { grid: { color: '#f0ece4' }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#6b6560', callback: v => fmt(v) } },
-        y: { grid: { color: '#f0ece4' }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#6b6560' } }
+        x: { grid: { display: false }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#6b6560', callback: v => fmt(v) } },
+        y: { grid: { display: false }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#6b6560' } }
       }
     },
     plugins: [barLabelPlugin]
