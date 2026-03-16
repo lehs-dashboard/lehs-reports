@@ -499,9 +499,25 @@ async function pgCheck() {
   const err   = document.getElementById('pg-err');
   if (!input) { err.className='pg-err show'; err.textContent='Please enter the password.'; return; }
 
-  const encoder = new TextEncoder();
-  const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(input));
-  const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  // Direct check first — works on all browsers/environments
+  if (input === 'LEHS@Admin_2027') {
+    sessionStorage.setItem('lehs_role','admin');
+    document.getElementById('pwd-gate').style.display = 'none';
+    return;
+  }
+  if (input === 'LEHS@demo_2021') {
+    sessionStorage.setItem('lehs_role','user');
+    document.getElementById('pwd-gate').style.display = 'none';
+    applyUserRestrictions();
+    return;
+  }
+
+  // Hash comparison as fallback
+  let hashHex = 'invalid';
+  try {
+    const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+    hashHex = Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  } catch(e) {}
 
   if (hashHex === _ADMIN_H) {
     sessionStorage.setItem('lehs_role','admin');
