@@ -120,19 +120,19 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
 </style>
 </head>
 <body>
-<div id="pwd-gate">
-  <div class="pg-grid"></div><div class="pg-glow"></div>
-  <div class="pg-corner pg-tl"></div><div class="pg-corner pg-tr"></div>
-  <div class="pg-corner pg-bl"></div><div class="pg-corner pg-br"></div>
-  <div class="pg-box">
-    <div class="pg-badge">LEHS &middot; Wadhwani AI</div>
-    <h1 class="pg-title">LEHS <em>Dashboard</em></h1>
-    <p class="pg-sub">Restricted Access</p>
-    <div class="pg-card">
-      <div class="pg-label">Password</div>
-      <input class="pg-input" id="pg-pwd" type="password" placeholder="Enter password" onkeydown="if(event.key==='Enter')pgCheck()">
-      <button class="pg-btn" onclick="pgCheck()">Access Dashboard &rarr;</button>
-      <div class="pg-err" id="pg-err">Incorrect password.</div>
+<div id="pwd-gate" style="position:fixed;inset:0;background:#080b14;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;z-index:9999;">
+  <div style="width:100%;max-width:320px;">
+    <div style="font-family:'DM Serif Display',serif;font-size:28px;color:#fff;text-align:center;margin-bottom:6px;">LEHS <em style="color:#2ea0ff;">Dashboard</em></div>
+    <div style="font-size:10px;color:rgba(255,255,255,.4);text-align:center;letter-spacing:.1em;text-transform:uppercase;margin-bottom:32px;">Restricted Access</div>
+    <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:24px;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:8px;">Password</div>
+      <input id="pg-pwd" type="password" placeholder="Enter password"
+        style="width:100%;padding:14px 16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:8px;font-size:16px;color:#fff;outline:none;font-family:'DM Mono',monospace;margin-bottom:12px;display:block;"
+        onkeydown="if(event.key==='Enter')pgCheck()">
+      <button id="pg-btn"
+        style="width:100%;padding:14px;background:#2ea0ff;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif;display:block;"
+        onclick="pgCheck()">Access Dashboard</button>
+      <div id="pg-err" style="font-size:12px;color:#ff6b6b;text-align:center;margin-top:10px;display:none;"></div>
     </div>
   </div>
 </div>
@@ -240,11 +240,12 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
 const _AH='af693f3455e416fcbf93abada6b65605d1a4fa9dbdbfea9bee5981ab403b2602';
 const _UH='abc23ba941557fc9ad8379c988db4bf3dab29d41d63f123e9513589476bfd9f1';
 let userRole='';
-async function pgCheck(){
-  const v=document.getElementById('pg-pwd').value,e=document.getElementById('pg-err');
-  if(!v){e.className='pg-err show';e.textContent='Please enter password.';return;}
+function pgCheck(){
+  const v=document.getElementById('pg-pwd').value;
+  const e=document.getElementById('pg-err');
+  e.style.display='none';
+  if(!v){e.textContent='Please enter password.';e.style.display='block';return;}
 
-  // Direct password check first (works everywhere)
   if(v==='LEHS@Admin_2027'){
     userRole='admin';sessionStorage.setItem('lehs_role','admin');
     document.getElementById('pwd-gate').style.display='none';
@@ -255,19 +256,7 @@ async function pgCheck(){
     document.getElementById('pwd-gate').style.display='none';
     applyRole();showSplash();loadExpense();return;
   }
-
-  // Try hash comparison as secondary check
-  try {
-    const h=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v)))).map(b=>b.toString(16).padStart(2,'0')).join('');
-    if(h===_AH||h===_UH){
-      userRole=h===_AH?'admin':'user';
-      sessionStorage.setItem('lehs_role',userRole);
-      document.getElementById('pwd-gate').style.display='none';
-      applyRole();showSplash();loadExpense();return;
-    }
-  } catch(err){}
-
-  e.className='pg-err show';e.textContent='Incorrect password.';
+  e.textContent='Incorrect password.';e.style.display='block';
   document.getElementById('pg-pwd').value='';
 }
 window.addEventListener('load',()=>{const r=sessionStorage.getItem('lehs_role');if(r){userRole=r;document.getElementById('pwd-gate').style.display='none';applyRole();showSplash();loadExpense();}});
