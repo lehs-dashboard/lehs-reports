@@ -7,133 +7,112 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-
 <style>
-:root {
-  --ink:#0d0d0d; --paper:#f5f0e8; --cream:#ede8dc; --card:#fff;
-  --accent:#c8400c; --accent2:#1a6b4a; --gold:#c8960c;
-  --muted:#6b6560; --border:#ddd8ce;
-}
+:root { --ink:#0d0d0d; --paper:#f5f0e8; --card:#fff; --accent:#c8400c; --accent2:#1a6b4a; --muted:#6b6560; --border:#ddd8ce; }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;padding-bottom: 70px;}
-
-/* Password Gate Style */
-#gate { position:fixed; inset:0; background:var(--ink); z-index:2000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; color:#fff; }
-.gate-input { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:12px; border-radius:8px; width:100%; max-width:280px; text-align:center; font-size:18px; margin-bottom:12px; }
+body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;padding-bottom:70px;}
 
 /* Dashboard UI */
-header { background:var(--ink); color:#fff; padding:15px; position:sticky; top:0; z-index:100; display:flex; justify-content:space-between; align-items:center;}
-.brand { font-family:'DM Serif Display'; font-size:18px; }
-.brand em { color:var(--accent); font-style:italic; }
+header{background:var(--ink);color:#fff;padding:15px;position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;}
+.brand{font-family:'DM Serif Display';font-size:18px;}
+.brand em{color:var(--accent);font-style:italic;}
 
-.mob-nav { position:fixed; bottom:0; left:0; right:0; background:var(--ink); display:flex; justify-content:space-around; padding:12px; z-index:1000; border-top:1px solid #333; }
-.nav-item { color:#fff; font-size:11px; text-decoration:none; opacity:0.5; text-align:center; }
-.nav-item.active { opacity:1; color:var(--accent); font-weight:700; }
+.mob-nav{position:fixed;bottom:0;left:0;right:0;background:var(--ink);display:flex;justify-content:space-around;padding:12px;z-index:1000;border-top:1px solid #333;}
+.nav-item{color:#fff;font-size:11px;text-decoration:none;opacity:0.5;text-align:center;}
+.nav-item.active{opacity:1;color:var(--accent);font-weight:700;}
 
-.card { background:var(--card); margin:10px; border-radius:12px; padding:15px; border:1px solid var(--border); }
-.kpi-grid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; padding:10px; }
-.kpi-card { background:var(--card); padding:15px; border-radius:12px; border:1px solid var(--border); border-left:4px solid var(--accent); }
-.kpi-label { font-size:10px; text-transform:uppercase; color:var(--muted); font-weight:600; }
-.kpi-val { font-family:'DM Serif Display'; font-size:18px; margin-top:4px; }
+.card{background:var(--card);margin:10px;border-radius:12px;padding:15px;border:1px solid var(--border);}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px;}
+.kpi-card{background:var(--card);padding:15px;border-radius:12px;border:1px solid var(--border);border-left:4px solid var(--accent);}
+.kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);}
+.kpi-val{font-family:'DM Serif Display';font-size:18px;margin-top:4px;}
 
-/* Pivot Styles */
-.pivot-scroll { overflow: auto; max-height: 400px; border-radius: 8px; border: 1px solid var(--border); }
-.pivot-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-.pivot-table th, .pivot-table td { padding: 8px; border: 1px solid var(--cream); text-align: right; }
-.pivot-table .row-label { text-align: left; position: sticky; left: 0; background: var(--card); font-weight: 600; }
-
-/* Multi-select filter mobile adaptation */
-.ms-trigger { border:1px solid var(--border); padding:8px; border-radius:6px; font-size:12px; margin-bottom:8px; background:#fff; }
+/* Pivot Table Mobile Optimization */
+.pivot-scroll{overflow:auto;max-height:500px;border-radius:8px;border:1px solid var(--border);}
+.pivot-table{width:100%;border-collapse:collapse;font-size:11px;}
+.pivot-table th, .pivot-table td{padding:8px;border:1px solid #eee;text-align:right;}
+.pivot-table .row-label{text-align:left;position:sticky;left:0;background:var(--card);font-weight:600;min-width:140px;}
 </style>
 </head>
 <body>
 
-<div id="gate">
-  <div class="brand" style="font-size:32px; margin-bottom:10px;">LEHS <em>Fin</em></div>
-  <p style="opacity:0.6; font-size:14px; margin-bottom:30px;">ENTER ACCESS KEY</p>
-  <input type="password" id="pass" class="gate-input" placeholder="••••">
-  <button onclick="checkPass()" style="background:var(--accent); color:white; border:none; padding:12px 40px; border-radius:8px; font-weight:700;">UNLOCK</button>
+<header>
+  <div class="brand">LEHS <em>Dashboard</em></div>
+  <div id="status" style="font-size:10px; opacity:0.6;">Connecting...</div>
+</header>
+
+<div id="page-overview" class="mob-page">
+  <div class="kpi-grid" id="kpi-box"></div>
+  <div class="card">
+    <canvas id="chart-main" style="height:250px;"></canvas>
+  </div>
 </div>
 
-<div id="app" style="display:none;">
-  <header>
-    <div class="brand">LEHS <em>Dashboard</em></div>
-    <div id="file-info" style="font-size:10px; opacity:0.6;">No File</div>
-  </header>
-
-  <div id="page-overview" class="mob-page">
-    <div class="kpi-grid" id="kpi-box"></div>
-    <div class="card">
-      <div id="filter-container">
-        </div>
-      <canvas id="chart-main" style="height:250px;"></canvas>
-    </div>
+<div id="page-pivot" class="mob-page" style="display:none;">
+  <div class="card">
+    <h3 style="font-family:'DM Serif Display';margin-bottom:10px;">Budget Pivot (Cr)</h3>
+    <div id="pivot-container" class="pivot-scroll"></div>
   </div>
-
-  <div id="page-pivot" class="mob-page" style="display:none;">
-    <div class="card">
-      <h3 style="font-family:'DM Serif Display'; margin-bottom:10px;">Budget Pivot</h3>
-      <div id="pivot-container" class="pivot-scroll"></div>
-    </div>
-  </div>
-
-  <div id="page-txns" class="mob-page" style="display:none;">
-    <div class="card">
-      <input type="text" id="txn-search" placeholder="Search transactions..." oninput="renderTxns()" style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--border);">
-      <table style="width:100%; font-size:12px; margin-top:15px; border-collapse:collapse;">
-        <tbody id="txn-body"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <nav class="mob-nav">
-    <a href="javascript:void(0)" class="nav-item active" onclick="showTab('overview', this)">OVERVIEW</a>
-    <a href="javascript:void(0)" class="nav-item" onclick="showTab('pivot', this)">PIVOT</a>
-    <a href="javascript:void(0)" class="nav-item" onclick="showTab('txns', this)">TXNS</a>
-    <a href="index.html" class="nav-item">DESKTOP</a>
-  </nav>
 </div>
+
+<nav class="mob-nav">
+  <a href="#" class="nav-item active" onclick="showTab('overview', this)">OVERVIEW</a>
+  <a href="#" class="nav-item" onclick="showTab('pivot', this)">PIVOT</a>
+  <a href="index.html" class="nav-item">DESKTOP</a>
+</nav>
 
 <script>
 let rawData = [], filtered = [];
-let charts = {};
 
-// Ported from index.html: Employee Mapping
-const EMP_MAP = { /* [Copy full object from index.html] */ };
-
-function checkPass() {
-  if(document.getElementById('pass').value === '1982') {
-    document.getElementById('gate').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    loadFromLocalStorage();
+// 1. GITHUB DATA FETCH
+async function initDashboard() {
+  const GITHUB_RAW_URL = "https://raw.githubusercontent.com/lehs-dashboard/lehs-reports/main/dashboard_data.xlsx";
+  try {
+    const res = await fetch(GITHUB_RAW_URL);
+    const ab = await res.arrayBuffer();
+    const wb = XLSX.read(ab, {type: 'array'});
+    processData(wb);
+    document.getElementById('status').innerText = "Live: GitHub";
+  } catch (e) {
+    document.getElementById('status').innerText = "Offline";
+    console.error(e);
   }
 }
 
-function loadFromLocalStorage() {
-  const stored = localStorage.getItem('last_lehs_data');
-  if(stored) {
-    const json = JSON.parse(stored);
-    rawData = json.data;
-    filtered = [...rawData];
-    document.getElementById('file-info').innerText = json.name;
-    refreshAll();
-  } else {
-    alert("Please upload the file on the Desktop version first.");
-    window.location.href = 'index.html';
-  }
+function processData(wb) {
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const data = XLSX.utils.sheet_to_json(ws);
+  
+  rawData = data.map(r => ({
+    date: r.Date || 'Unspecified',
+    vendor: r['Vendor Name'] || 'Unspecified',
+    amount: parseFloat(r.Amount) || 0,
+    budget: r['Budget Line'] || 'Unspecified',
+    source: r.Source || 'General',
+    monthKey: r.Date ? r.Date.split('/')[1] + '-' + r.Date.split('/')[2] : 'Unknown'
+  }));
+  
+  filtered = [...rawData];
+  renderAll();
 }
 
-// Ported from index.html: Pivot Table Logic
+function renderAll() {
+  renderKPIs();
+  renderMainChart();
+  renderPivot();
+}
+
+function renderKPIs() {
+  const total = filtered.reduce((s,r) => s+r.amount, 0);
+  document.getElementById('kpi-box').innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">TOTAL EXPENSE</div><div class="kpi-val">₹${(total/10000000).toFixed(2)}Cr</div></div>
+    <div class="kpi-card" style="border-left-color:var(--accent2)"><div class="kpi-label">ENTRIES</div><div class="kpi-val">${filtered.length}</div></div>
+  `;
+}
+
 function renderPivot() {
-  const monthSet = new Map();
-  const budgetSet = new Set();
-  filtered.forEach(r => {
-    if(r.monthKey && r.monthKey !== 'Unknown') monthSet.set(r.monthKey, r.monthKey);
-    if(r.budget) budgetSet.add(r.budget);
-  });
-
-  const months = [...monthSet.keys()].sort();
-  const budgets = [...budgetSet].sort();
+  const budgets = [...new Set(filtered.map(r => r.budget))].sort();
+  const months = [...new Set(filtered.map(r => r.monthKey))].sort();
   
   let html = `<table class="pivot-table"><thead><tr><th class="row-label">Budget</th>`;
   months.forEach(m => html += `<th>${m}</th>`);
@@ -142,39 +121,20 @@ function renderPivot() {
   budgets.forEach(b => {
     html += `<tr><td class="row-label">${b}</td>`;
     months.forEach(m => {
-      const val = filtered.filter(r => r.budget === b && r.monthKey === m).reduce((s, r) => s + r.amount, 0);
+      const val = filtered.filter(r => r.budget === b && r.monthKey === m).reduce((s,r) => s+r.amount, 0);
       html += `<td>${(val/10000000).toFixed(2)}</td>`;
     });
     html += `</tr>`;
   });
-  html += `</tbody></table>`;
-  document.getElementById('pivot-container').innerHTML = html;
-}
-
-function refreshAll() {
-  renderKPIs();
-  renderMainChart();
-  renderPivot();
-  renderTxns();
-}
-
-function renderKPIs() {
-  const total = filtered.reduce((s,r) => s+r.amount, 0);
-  const count = filtered.length;
-  document.getElementById('kpi-box').innerHTML = `
-    <div class="kpi-card"><div class="kpi-label">TOTAL EXPENSE</div><div class="kpi-val">₹${(total/10000000).toFixed(2)}Cr</div></div>
-    <div class="kpi-card" style="border-left-color:var(--accent2)"><div class="kpi-label">RECORDS</div><div class="kpi-val">${count}</div></div>
-  `;
+  document.getElementById('pivot-container').innerHTML = html + `</tbody></table>`;
 }
 
 function renderMainChart() {
   const ctx = document.getElementById('chart-main').getContext('2d');
-  if(charts.main) charts.main.destroy();
-  
   const agg = {};
   filtered.forEach(r => agg[r.source] = (agg[r.source] || 0) + r.amount);
-
-  charts.main = new Chart(ctx, {
+  
+  new Chart(ctx, {
     type: 'doughnut',
     data: {
       labels: Object.keys(agg),
@@ -191,16 +151,7 @@ function showTab(id, el) {
   el.classList.add('active');
 }
 
-function renderTxns() {
-  const q = document.getElementById('txn-search').value.toLowerCase();
-  const rows = filtered.filter(r => r.vendor.toLowerCase().includes(q)).slice(0, 50);
-  document.getElementById('txn-body').innerHTML = rows.map(r => `
-    <tr style="border-bottom:1px solid var(--cream);">
-      <td style="padding:10px 0;"><strong>${r.vendor}</strong><br><span style="color:var(--muted); font-size:10px;">${r.date}</span></td>
-      <td style="text-align:right; font-family:'DM Mono';">₹${r.amount.toLocaleString()}</td>
-    </tr>
-  `).join('');
-}
+window.onload = initDashboard;
 </script>
 </body>
 </html>
