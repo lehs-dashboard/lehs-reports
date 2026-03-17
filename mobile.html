@@ -422,7 +422,6 @@ function mkChart(id,type,labels,data,colors){
           color:'#000',
           anchor:'end',
           align:'top',
-          rotation: id === 'ch-monthly' ? -90 : 0,
           font:{size:9,weight:'600'},
           formatter:(value)=>fmt(value)
         }
@@ -448,7 +447,7 @@ function renderOverview(){
   const srcs=Object.entries(srcMap).sort((a,b)=>b[1]-a[1]);
   const cls=['c2','c3','c4'];
   document.getElementById('ov-kpis').innerHTML=
-    `<div class="kpi"><div class="kpi-label">Total Spend</div><div class="kpi-val">${fmt(tot)}</div><div class="kpi-sub">${rawData.length.toLocaleString('en-IN')} transactions</div></div>`  
+    `<div class="kpi"><div class="kpi-label">Total Spend</div><div class="kpi-val">${fmt(tot)}</div><div class="kpi-sub">${rawData.length.toLocaleString('en-IN')} transactions</div></div>`+
     srcs.slice(0,3).map(([k,v],i)=>`<div class="kpi ${cls[i]}"><div class="kpi-label">${k}</div><div class="kpi-val">${fmt(v)}</div></div>`).join('');
   setTimeout(()=>{
     const dd=agg(rawData,'domain',8);mkChart('ch-domain','bar',dd.map(d=>d[0].length>13?d[0].slice(0,13)+'..':d[0]),dd.map(d=>d[1]),COLORS);
