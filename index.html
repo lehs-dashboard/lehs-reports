@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>if(window.innerWidth<=768||/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)){window.location.replace("mobile.html");}</script>   
+<script>if(window.innerWidth<=768||/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)){window.location.replace("mobile.html");}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>LEHS Expense Dashboard</title>
@@ -417,6 +417,130 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
 .dash-sidebar-nav .tab-btn:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.07);}
 .dash-sidebar-nav .tab-btn.active{background:rgba(200,64,12,.15);color:var(--accent);border-color:rgba(200,64,12,.3);}
 @media(max-width:900px){.dash-sidebar{width:180px;}.dash-main{margin-left:180px;}}
+
+/* ══ MOBILE CSS ══ */
+#mob-view{display:none;}
+
+:root {
+  --ink:#0d0d0d; --paper:#f5f0e8; --cream:#ede8dc; --card:#fff;
+  --accent:#c8400c; --accent2:#1a6b4a; --gold:#c8960c;
+  --muted:#6b6560; --border:#ddd8ce;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;}
+
+/* ── PASSWORD GATE ── */
+#pwd-gate{position:fixed;inset:0;background:#080b14;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:24px;}
+#pwd-gate .pg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(46,160,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(46,160,255,.06) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;}
+#pwd-gate .pg-glow{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(46,160,255,.1) 0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+#pwd-gate .pg-corner{position:absolute;width:18px;height:18px;border-color:rgba(46,160,255,.35);border-style:solid;pointer-events:none;}
+#pwd-gate .pg-tl{top:16px;left:16px;border-width:1px 0 0 1px;}
+#pwd-gate .pg-tr{top:16px;right:16px;border-width:1px 1px 0 0;}
+#pwd-gate .pg-bl{bottom:16px;left:16px;border-width:0 0 1px 1px;}
+#pwd-gate .pg-br{bottom:16px;right:16px;border-width:0 1px 1px 0;}
+#pwd-gate .pg-box{position:relative;z-index:1;width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center;}
+#pwd-gate .pg-badge{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#2ea0ff;border:1px solid rgba(46,160,255,.3);padding:4px 14px;border-radius:99px;margin-bottom:16px;}
+#pwd-gate .pg-title{font-family:'DM Serif Display',serif;font-size:32px;color:#fff;margin:0 0 4px;text-align:center;}
+#pwd-gate .pg-title em{font-style:italic;color:#2ea0ff;}
+#pwd-gate .pg-sub{font-size:10px;color:rgba(255,255,255,.35);letter-spacing:.08em;text-transform:uppercase;margin-bottom:28px;}
+#pwd-gate .pg-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:24px;width:100%;display:flex;flex-direction:column;gap:12px;}
+#pwd-gate .pg-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);}
+#pwd-gate .pg-input{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:14px 16px;font-size:16px;color:#fff;font-family:DM Mono,monospace;outline:none;width:100%;}
+#pwd-gate .pg-input:focus{border-color:#2ea0ff;}
+#pwd-gate .pg-btn{background:#2ea0ff;color:#fff;border:none;border-radius:8px;padding:14px;font-family:'Sora',sans-serif;font-size:15px;font-weight:700;cursor:pointer;width:100%;}
+#pwd-gate .pg-err{font-size:12px;color:#ff6b6b;text-align:center;display:none;}
+#pwd-gate .pg-err.show{display:block;}
+
+/* ── SPLASH ── */
+#splash{position:fixed;inset:0;background:#080b14;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;}
+#splash .sp-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(46,160,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(46,160,255,.06) 1px,transparent 1px);background-size:44px 44px;}
+#splash .sp-glow{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(46,160,255,.1) 0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%);}
+#splash .sp-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;}
+#splash .sp-badge{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#2ea0ff;border:1px solid rgba(46,160,255,.3);padding:4px 14px;border-radius:99px;margin-bottom:16px;}
+#splash .sp-title{font-family:'DM Serif Display',serif;font-size:36px;color:#fff;margin-bottom:6px;text-align:center;}
+#splash .sp-title em{font-style:italic;color:#2ea0ff;}
+#splash .sp-sub{font-size:10px;color:rgba(255,255,255,.35);letter-spacing:.08em;text-transform:uppercase;margin-bottom:28px;}
+#splash .sp-bar{width:140px;height:2px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden;}
+#splash .sp-fill{height:100%;background:#2ea0ff;border-radius:99px;animation:scan 1.5s ease-in-out infinite;width:40%;}
+@keyframes scan{0%{transform:translateX(-200%)}100%{transform:translateX(350%)}}
+
+/* ── HEADER ── */
+#app{display:none;}
+.mob-header{background:#0d0d0d;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.mob-logo{font-family:'DM Serif Display',serif;font-size:16px;color:#fff;}
+.mob-logo span{color:var(--accent);font-style:italic;}
+.mob-period{font-size:10px;color:rgba(255,255,255,.4);font-family:DM Mono,monospace;margin-top:2px;}
+
+/* ── BOTTOM NAV ── */
+.mob-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+.mob-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;border:none;background:transparent;cursor:pointer;font-family:'Sora',sans-serif;font-size:9px;color:var(--muted);transition:color .2s;}
+.mob-nav-btn.active{color:var(--accent);}
+.mob-nav-btn .nav-icon{font-size:18px;}
+.fst{font-size:11px;font-weight:600;padding:6px 14px;border-radius:99px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.fst.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+/* ── PAGES ── */
+.mob-page{display:none;padding:14px 14px 80px;}
+.mob-page.active{display:block;}
+
+/* ── KPI CARDS ── */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.kpi-card{background:var(--card);border-radius:12px;padding:14px;border-left:3px solid var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.kpi-card.c2{border-left-color:var(--accent2);}
+.kpi-card.c3{border-left-color:#1a6b9a;}
+.kpi-card.c4{border-left-color:var(--gold);}
+.kpi-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.kpi-value{font-family:'DM Serif Display',serif;font-size:20px;color:var(--ink);line-height:1;}
+.kpi-sub{font-size:9px;color:var(--muted);margin-top:3px;}
+
+/* ── SECTION CARD ── */
+.mob-card{background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.mob-card-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:2px;}
+.mob-card-sub{font-size:11px;color:var(--muted);margin-bottom:14px;}
+
+/* ── CHART ── */
+.chart-wrap{height:260px;position:relative;width:100%;}
+
+/* ── FILTER BAR ── */
+.mob-filters{display:flex;gap:8px;overflow-x:auto;padding:0 0 8px;margin-bottom:12px;scrollbar-width:none;}
+.mob-filters::-webkit-scrollbar{display:none;}
+.mob-filter-chip{flex-shrink:0;font-size:11px;font-family:'Sora',sans-serif;font-weight:600;padding:6px 14px;border-radius:99px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;transition:all .15s;}
+.mob-filter-chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* ── TABLE ── */
+.mob-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.mob-table{width:100%;border-collapse:collapse;font-size:12px;}
+.mob-table th{text-align:left;padding:8px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--border);background:var(--paper);white-space:nowrap;}
+.mob-table td{padding:9px 10px;border-bottom:1px solid var(--cream);vertical-align:middle;}
+.mob-table tr:last-child td{border-bottom:none;}
+.mob-table .amt{text-align:right;font-family:DM Mono,monospace;font-weight:600;}
+.mob-table .muted{color:var(--muted);font-size:11px;}
+
+/* ── SEARCH ── */
+.mob-search{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'Sora',sans-serif;background:var(--card);outline:none;margin-bottom:12px;}
+.mob-search:focus{border-color:var(--accent);}
+
+/* ── BADGE ── */
+.src-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px;letter-spacing:.04em;}
+.src-fcra{background:#e8f4f0;color:#0f6e56;}
+.src-nonfcra{background:#fff3e8;color:#c8640c;}
+.src-ffs{background:#e8eef8;color:#185fa5;}
+
+/* ── SUMMARY ROW ── */
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--cream);}
+.summary-row:last-child{border-bottom:none;}
+.summary-row .sr-label{font-size:13px;color:var(--ink);}
+.summary-row .sr-val{font-family:DM Mono,monospace;font-size:13px;font-weight:600;color:var(--ink);}
+.summary-row .sr-bar{height:4px;background:var(--cream);border-radius:99px;margin-top:4px;overflow:hidden;}
+.summary-row .sr-fill{height:100%;background:var(--accent);border-radius:99px;}
+
+/* ── LOAD MORE ── */
+.btn-more{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:transparent;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;margin-top:10px;}
+.btn-more:active{background:var(--cream);}
+
+/* ── EMPTY ── */
+.mob-empty{text-align:center;padding:32px 16px;color:var(--muted);font-size:13px;}
+
 </style>
 </head>
 <body>
@@ -3745,6 +3869,491 @@ function fin_printSection(section) {
   setTimeout(() => { win.print(); }, 800);
 }
 
+
+/* ══════════════════════════════════
+   MOBILE DETECTION + RENDERING
+══════════════════════════════════ */
+(function() {
+  var isMobile = window.innerWidth <= 900 || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  if (!isMobile) { var mv=document.getElementById('mob-view'); if(mv)mv.remove(); return; }
+
+  // Show mobile, hide desktop elements
+  document.getElementById('mob-view').style.display = 'block';
+
+  // Mobile colors
+  var MOB_COLORS = ['#c8400c','#1a6b4a','#c8960c','#1a6b9a','#7a3090','#2e8b57','#d4521a','#3a8fc8','#8b5a2b','#4a90d9'];
+
+  /* DATA */
+let rawData=[];
+var REPO_URL_MOB_MOB='https://raw.githubusercontent.com/lehs-dashboard/lehs-reports/main/Consolidated_Report_-_Apr_25.xlsx';
+const REPO_TB_URL='https://raw.githubusercontent.com/lehs-dashboard/lehs-reports/main/Consol_TB_FY25-26.xlsx';
+const REPO_MAP_URL='https://raw.githubusercontent.com/lehs-dashboard/lehs-reports/main/Financials%20Mapping.xlsx';
+const COLORS=['#c8400c','#1a6b4a','#c8960c','#1a6b9a','#7a3090','#2e8b57','#d4521a','#3a8fc8','#8b5a2b','#4a90d9'];
+async function loadData(){try{const resp=await fetch(REPO_URL_MOB);if(!resp.ok)throw new Error('HTTP '+resp.status);parseData(await resp.arrayBuffer());}catch(e){hideSplash();document.getElementById('page-overview').innerHTML='<div class="mob-empty">Could not load data.<br><small style="color:var(--muted);font-size:10px;">'+e.message+'</small></div>';}}
+function parseData(buf){
+  const wb=XLSX.read(buf,{type:'array',cellDates:true}),ws=wb.Sheets[wb.SheetNames[0]];
+  const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''});
+  let hRow=0;for(let i=0;i<Math.min(10,rows.length);i++){if(rows[i].some(c=>typeof c==='string'&&(c.toUpperCase().includes('SOURCE')||c.toUpperCase().includes('AMOUNT')))){hRow=i;break;}}
+  const headers=rows[hRow].map(h=>(h||'').toString().trim().toUpperCase());
+  const colMap={};headers.forEach((h,i)=>colMap[h]=i);
+  const getCol=(...names)=>{for(const n of names){if(colMap[n]!==undefined)return colMap[n];const k=Object.keys(colMap).find(c=>c.includes(n));if(k!==undefined)return colMap[k];}return -1;};
+  const cSrc=getCol('SOURCE'),cDate=getCol('BILL_DATE','DATE'),cVendor=getCol('VENDOR_NAME','VENDOR NAME'),cEmpVend=getCol('EMPLOYEE/VENDOR','EMPLOYEE'),
+        cAccount=getCol('ACCOUNT_NAME','ACCOUNT NAME','ACCOUNT'),cDonor=getCol('DONOR'),cDomain=getCol('DOMAIN'),cSolution=getCol('SOLUTIONS','SOLUTION'),
+        cLocation=getCol('LOCATION'),cAmount=getCol('TOTAL AMOUNT','AMOUNT'),cBudget=getCol('BUDGET_LINE_ITEM','BUDGET LINE ITEM','BUDGET_LINE','BUDGET'),
+        cProject=getCol('PROJECT_ID','PROJECT ID','PROJECT'),cGrant=getCol('GRANT_ID','GRANT ID','GRANT');
+  rawData=[];
+  for(let i=hRow+1;i<rows.length;i++){
+    const r=rows[i];if(!r||!r.length)continue;
+    const rawAmt=r[cAmount];if(rawAmt===''||rawAmt===undefined||rawAmt===null)continue;
+    const amt=typeof rawAmt==='number'?rawAmt:parseFloat(rawAmt.toString().replace(/[^0-9.-]/g,''));
+    if(isNaN(amt)||amt===0)continue;
+    const vendorVal=cVendor>=0?r[cVendor]:(cEmpVend>=0?r[cEmpVend]:'');
+    const srcVal=clean(r[cSrc]),donorRaw=clean(r[cDonor]);
+    rawData.push({source:srcVal,date:formatDate(r[cDate]),monthKey:parseMonthKey(formatDate(r[cDate])),
+      vendor:clean(vendorVal),empVendor:clean(cEmpVend>=0?r[cEmpVend]:vendorVal),
+      account:clean(r[cAccount]),donor:mapDonor(srcVal,donorRaw),domain:clean(r[cDomain]),
+      solution:clean(r[cSolution]),location:clean(r[cLocation]),budget:clean(r[cBudget]),
+      project:clean(r[cProject]),grant:clean(r[cGrant]),amount:amt});
+  }
+  const dates=rawData.map(r=>r.date).filter(Boolean);
+  if(dates.length)document.getElementById('mob-period').textContent=dates[0]+' – '+dates[dates.length-1];
+  hideSplash();
+  try{renderAll();}catch(e){document.getElementById('page-overview').innerHTML+='<div class="mob-empty" style="color:red;font-size:11px;">Render error: '+e.message+'</div>';}
+  if(sessionStorage.getItem('lehs_role')==='admin')loadFinancials();
+}
+
+const charts={};
+function makeChart(id,type,labels,data,colors){if(charts[id])charts[id].destroy();const ctx=document.getElementById(id);if(!ctx)return;charts[id]=new Chart(ctx.getContext('2d'),{type,data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:type==='bar'?0:2,borderColor:'#fff',borderRadius:type==='bar'?4:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:type!=='bar',position:'bottom',labels:{font:{size:10,family:'Sora'},padding:8,boxWidth:10}}},scales:type==='bar'?{x:{grid:{display:false},ticks:{font:{size:9},color:'#6b6560'}},y:{grid:{display:false},ticks:{font:{size:9},color:'#6b6560',callback:v=>fmt(v)}}}:{}}});}
+
+  function renderAll(){renderKPIs();renderCharts();renderBudget();renderVendors();}
+function renderKPIs(){
+  const total=rawData.reduce((s,r)=>s+r.amount,0);
+  document.getElementById('mob-kpi').innerHTML=[
+    {l:'Total Spend',v:fmt(total),s:rawData.length.toLocaleString('en-IN')+' transactions',c:''},
+    {l:'Domains',v:new Set(rawData.filter(r=>r.domain!=='Unspecified').map(r=>r.domain)).size,s:'programme areas',c:'c3'},
+    {l:'Vendors',v:new Set(rawData.filter(r=>r.vendor!=='Unspecified').map(r=>r.vendor)).size,s:'unique vendors',c:'c4'},
+    {l:'Donors',v:new Set(rawData.filter(r=>r.donor!=='Unspecified').map(r=>r.donor)).size,s:'funding sources',c:'c2'},
+  ].map(k=>'<div class="kpi-card '+k.c+'"><div class="kpi-label">'+k.l+'</div><div class="kpi-value">'+k.v+'</div><div class="kpi-sub">'+k.s+'</div></div>').join('');
+}
+function renderCharts(){setTimeout(function(){
+  const dd=agg(rawData,'domain').filter(([k])=>k!=='Unspecified').slice(0,8);
+  makeChart('chart-domain','bar',dd.map(d=>d[0].length>12?d[0].slice(0,12)+'..':d[0]),dd.map(d=>d[1]),COLORS);
+  const sd=agg(rawData,'source').filter(([k])=>k!=='Unspecified');
+  makeChart('chart-source','doughnut',sd.map(d=>d[0]),sd.map(d=>d[1]),['#c8400c','#1a6b4a','#1a6b9a','#c8960c']);
+  const mo={};rawData.forEach(r=>{const k=r.monthKey;if(k&&k!=='Unknown')mo[k]=(mo[k]||0)+r.amount;});
+  const mks=Object.keys(mo).sort().slice(-12);
+  makeChart('chart-monthly','bar',mks.map(k=>{const months=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];const parts=k.split('-');return months[parseInt(parts[1])]+"'"+(parts[0].slice(2));}),mks.map(k=>mo[k]),'#1a6b4a');
+  const bd=agg(rawData.filter(r=>r.budget!=='Indirect Cost'),'budget').filter(([k])=>k!=='Unspecified').slice(0,8);
+  makeChart('chart-budget','bar',bd.map(d=>d[0].length>14?d[0].slice(0,14)+'..':d[0]),bd.map(d=>d[1]),COLORS);
+  const don=agg(rawData,'donor').filter(([k])=>k!=='Unspecified').slice(0,8);
+  makeChart('chart-donor','bar',don.map(d=>d[0].length>14?d[0].slice(0,14)+'..':d[0]),don.map(d=>d[1]),COLORS);
+  const sol=agg(rawData,'solution').filter(([k])=>k!=='Unspecified').slice(0,8);
+  makeChart('chart-solution','bar',sol.map(d=>d[0].length>14?d[0].slice(0,14)+'..':d[0]),sol.map(d=>d[1]),COLORS);
+},50);}
+let activeBudgetSrc=null;
+function renderBudget(){const sources=[...new Set(rawData.map(r=>r.source))];document.getElementById('budget-src-filters').innerHTML='<span class="mob-filter-chip active" onclick="setBudgetSrc(null,this)">All</span>'+sources.map(s=>'<span class="mob-filter-chip" onclick="setBudgetSrc(\''+s+'\',this)">'+s+'</span>').join('');renderBudgetData();}
+function setBudgetSrc(src,el){activeBudgetSrc=src;document.querySelectorAll('#budget-src-filters .mob-filter-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderBudgetData();}
+function renderBudgetData(){const data=(activeBudgetSrc?rawData.filter(r=>r.source===activeBudgetSrc):rawData).filter(r=>r.budget!=='Indirect Cost');const agged=agg(data,'budget').filter(([k])=>k!=='Unspecified');const total=agged.reduce((s,d)=>s+d[1],0);document.getElementById('budget-sub').textContent='Excl. IDC · '+(activeBudgetSrc||'All sources')+' · '+fmt(total);document.getElementById('budget-list').innerHTML=agged.map(([k,v])=>'<div class="summary-row"><div style="flex:1;min-width:0;"><div class="sr-label" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+k+'</div><div class="sr-bar"><div class="sr-fill" style="width:'+Math.round(v/total*100)+'%"></div></div></div><div class="sr-val" style="margin-left:12px;">'+fmt(v)+'</div></div>').join('');}
+let vendorPage=1;
+function renderVendors(){const q=(document.getElementById('vendor-search').value||'').toLowerCase();const data=agg(rawData,'vendor').filter(([k])=>k!=='Unspecified'&&k.toLowerCase().includes(q));const show=data.slice(0,vendorPage*20);document.getElementById('vendor-body').innerHTML=show.map(([k,v])=>'<tr><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+k+'</td><td class="amt">'+fmt(v)+'</td></tr>').join('');document.getElementById('vendor-more').style.display=show.length<data.length?'block':'none';}
+let activeSource=null;
+function renderSourceFilters(){const sources=[...new Set(rawData.map(r=>r.source))];document.getElementById('mob-source-filters').innerHTML='<span class="mob-filter-chip active" onclick="setSource(null,this)">All</span>'+sources.map(s=>'<span class="mob-filter-chip" onclick="setSource(\''+s+'\',this)">'+s+'</span>').join('');}
+function setSource(src,el){activeSource=src;document.querySelectorAll('#mob-source-filters .mob-filter-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');txnPage=1;renderTxns();}
+let txnPage=1;
+function renderTxns(){const q=(document.getElementById('txn-search').value||'').toLowerCase();let data=rawData.filter(r=>{if(activeSource&&r.source!==activeSource)return false;if(q&&!(r.vendor+' '+r.domain+' '+r.project+' '+r.budget).toLowerCase().includes(q))return false;return true;});const show=data.slice(0,txnPage*30);document.getElementById('txn-body').innerHTML=show.map(r=>'<tr><td class="muted" style="white-space:nowrap;">'+r.date+'</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+r.vendor+'</td><td class="muted" style="white-space:nowrap;">'+(r.domain==='Unspecified'?'':r.domain)+'</td><td class="amt">'+fmt(r.amount)+'</td></tr>').join('');document.getElementById('txn-more').style.display=show.length<data.length?'block':'none';}
+let personnelPage=1,activeDept=null;
+function renderPersonnel(){
+  const PERS=rawData.filter(r=>r.budget==='Personnel');const em={};
+  PERS.forEach(r=>{const code=(r.empVendor||'').trim();if(!em[code])em[code]={code,amount:0,info:EMP_MAP[code]||null};em[code].amount+=r.amount;});
+  const emps=Object.values(em).filter(e=>e.amount>0).sort((a,b)=>b.amount-a.amount);
+  const depts=[...new Set(emps.map(e=>e.info?e.info.department:'Unspecified'))].sort();
+  document.getElementById('dept-filter').innerHTML='<span class="mob-filter-chip active" onclick="setDept(null,this)">All</span>'+depts.map(d=>`<span class="mob-filter-chip" onclick="setDept('${d.replace(/'/g,'')}',this)">${d}</span>`).join('');
+  const dt={};emps.forEach(e=>{const d=e.info?e.info.department:'Unspecified';dt[d]=(dt[d]||0)+e.amount;});
+  const da=Object.entries(dt).sort((a,b)=>b[1]-a[1]),dtot=da.reduce((s,d)=>s+d[1],0);
+  document.getElementById('dept-bars').innerHTML=da.map(([k,v],i)=>'<div class="summary-row"><div style="flex:1;min-width:0;"><div class="sr-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+k+'</div><div class="sr-bar"><div class="sr-fill" style="width:'+(v/dtot*100).toFixed(1)+'%;background:'+COLORS[i%COLORS.length]+'"></div></div></div><div class="sr-val" style="margin-left:12px;">'+fmt(v)+'</div></div>').join('');
+  renderPersonnelList(emps);
+}
+function setDept(dept,el){activeDept=dept;personnelPage=1;document.querySelectorAll('#dept-filter .mob-filter-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderPersonnel();}
+function renderPersonnelList(emps){
+  const q=(document.getElementById('personnel-search')||{value:''}).value.toLowerCase();
+  const fil=emps.filter(e=>{if(activeDept&&(e.info?e.info.department:'Unspecified')!==activeDept)return false;if(q&&![e.code,e.info?e.info.designation:'',e.info?e.info.department:''].join(' ').toLowerCase().includes(q))return false;return true;});
+  document.getElementById('personnel-sub').textContent=fil.length+' employees · '+fmt(fil.reduce((s,e)=>s+e.amount,0));
+  const show=fil.slice(0,personnelPage*30);
+  function ab(n){const c=['#c8400c','#1a6b4a','#1a6b9a','#7c3aed','#0891b2','#c8960c','#be185d'];let h=0;for(const x of(n||'?'))h=(h*31+x.charCodeAt(0))%c.length;return c[h];}
+  document.getElementById('personnel-list').innerHTML=show.map(e=>'<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--cream);"><div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;background:'+ab(e.code)+';">'+e.code.slice(-3)+'</div><div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(e.info?e.info.designation:e.code)+'</div><div style="display:flex;gap:6px;margin-top:2px;"><span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--cream);color:var(--muted);">'+(e.info?e.info.department:'Unspecified')+'</span></div></div><div style="font-size:12px;font-weight:700;font-family:DM Mono,monospace;flex-shrink:0;">'+fmt(e.amount)+'</div></div>').join('');
+  document.getElementById('personnel-more').style.display=show.length<fil.length?'block':'none';
+}
+
+/* FINANCIALS */
+const FIN_CI={book:0,nature:1,accType:2,accName:3,projId:4,opening:5,debit:6,credit:7,closing:8};
+const FIN_BOOKS=['FCRA','Non FCRA','FFS'];
+let FIN_SPECIFIC_MAP={},FIN_SPECIFIC_MAP_LOW={},FIN_DEFAULT_MAP={};
+let FIN_RAW=[],FIN_TOTALS={},FIN_DATA={};
+function fin_parseMapping(buf) {
+  const wb   = XLSX.read(buf, { type:'array' });
+  const ws   = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:'' });
+  FIN_SPECIFIC_MAP = {}; FIN_SPECIFIC_MAP_LOW = {}; FIN_DEFAULT_MAP = {};
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    const acc    = (r[0] || '').toString().trim();
+    const proj   = (r[1] || '').toString().trim();
+    const mapval = (r[2] || '').toString().trim();
+    if (!acc || !mapval) continue;
+    if (!proj || proj === '-No Value-') {
+      FIN_DEFAULT_MAP[acc] = mapval;
+    } else {
+      const key = acc + '|||' + proj;
+      FIN_SPECIFIC_MAP[key] = mapval;
+      FIN_SPECIFIC_MAP_LOW[key.toLowerCase()] = mapval;
+    }
+  }
+}
+
+function fin_parseTB(buf) {
+  const wb   = XLSX.read(buf, { type:'array', cellDates:true });
+  const ws   = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:'' });
+
+  FIN_RAW = []; FIN_TOTALS = {};
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r || !r.length) continue;
+    const book   = (r[FIN_CI.book]    || '').toString().trim();
+    const accName= (r[FIN_CI.accName] || '').toString().trim();
+    const projId = (r[FIN_CI.projId]  || '').toString().trim();
+    const opening= fin_toNum(r[FIN_CI.opening]);
+    const debit  = fin_toNum(r[FIN_CI.debit]);
+    const credit = fin_toNum(r[FIN_CI.credit]);
+    const closing= fin_toNum(r[FIN_CI.closing]);
+    if (!book || !accName) continue;
+
+    // Resolve mapping: specific (acc+proj) first — exact, then case-insensitive, then default
+    const specKey    = accName + '|||' + projId;
+    const specKeyLow = specKey.toLowerCase();
+    let mapKey = FIN_SPECIFIC_MAP[specKey]
+              ?? FIN_SPECIFIC_MAP_LOW[specKeyLow]
+              ?? FIN_DEFAULT_MAP[accName]
+              ?? ({'SALARY PAYABLE':'Employee benefits payable','APP PAYABLE':'Other Trade Payables'}[accName] || null);
+
+    FIN_RAW.push({ book, accName, projId, opening, debit, credit, closing, mapKey });
+
+    if (!mapKey || mapKey === 'IGNORE') continue;
+
+    if (!FIN_TOTALS[mapKey]) FIN_TOTALS[mapKey] = {};
+    if (FIN_BOOKS.includes(book)) {
+      if (!FIN_TOTALS[mapKey][book]) FIN_TOTALS[mapKey][book] = [0,0,0,0];
+      FIN_TOTALS[mapKey][book][0] += opening;
+      FIN_TOTALS[mapKey][book][1] += debit;
+      FIN_TOTALS[mapKey][book][2] += credit;
+      FIN_TOTALS[mapKey][book][3] += closing;
+    }
+  }
+}
+function fin_toNum(v) {
+  if (v === null || v === undefined || v === '') return 0;
+  if (typeof v === 'number') return v;
+  const s = v.toString().trim();
+  if (s.startsWith('=')) return 0;
+  return parseFloat(s.replace(/[^0-9.\-]/g,'')) || 0;
+}
+function fin_G(mapKey, book, f=3) { return ((FIN_TOTALS[mapKey] || {})[book] || [0,0,0,0])[f]; }
+// returns [FCRA, Non FCRA, FFS, TOTAL] for a given field f (default closing=3)
+function fin_V(mapKey, sign=1, f=3) {
+  const vals = FIN_BOOKS.map(b => sign * fin_G(mapKey, b, f));
+  return [...vals, vals.reduce((a,v)=>a+v, 0)];
+}
+function fin_V(mapKey, sign=1, f=3) {
+  const vals = FIN_BOOKS.map(b => sign * fin_G(mapKey, b, f));
+  return [...vals, vals.reduce((a,v)=>a+v, 0)];
+}
+function fin_VM(keys, sign=1, f=3) {
+  const vals = FIN_BOOKS.map(b => keys.reduce((t,k) => t + sign * fin_G(k, b, f), 0));
+  return [...vals, vals.reduce((a,v)=>a+v, 0)];
+}
+const FIN_A4 = (a,b) => a.map((v,i) => v + b[i]);
+const FIN_S4 = (a,b) => a.map((v,i) => v - b[i]);
+function fin_compute() {
+  const d = FIN_DATA;
+
+  // ── Expenditure (positive closing = expense debit balance) ──
+  d.empExp      = fin_V('Employee benefits expense');
+  d.progExp     = fin_V('Program expenses');   // IDC Expense is mapped to 'ICR for the year', not here
+  d.adminExp    = fin_V('Administrative expenses');
+  d.depr        = fin_V('Depreciation');
+  d.finCost     = fin_V('Finance cost');
+
+  // ── Unmapped expenses (no mapping) → net closing per book, shown as own line ──
+  // Uses net closing (same as warning list) so both figures always match
+  const unmappedNet = {};
+  FIN_BOOKS.forEach(b => unmappedNet[b] = 0);
+  FIN_RAW.forEach(r => {
+    if ((!r.mapKey || r.mapKey === '') && FIN_BOOKS.includes(r.book))
+      unmappedNet[r.book] += r.closing;
+  });
+  d.unmappedExp = [...FIN_BOOKS.map(b => Math.max(0, unmappedNet[b])), 0];
+  d.unmappedExp[3] = d.unmappedExp.slice(0,3).reduce((a,v)=>a+v,0);
+
+  // ── Income (credit balance = negative closing → negate for display) ──
+  d.otherInc = fin_V('Other Income', -1);
+  d.saleSvc  = FIN_BOOKS.map(b => b === 'FFS' ? -1 * fin_G('Sale of Services', b, 3) : 0);
+  d.saleSvc  = [...d.saleSvc, d.saleSvc.reduce((a,v)=>a+v,0)];
+
+  // Donation & Grants = cost-recovery (emp+prog+admin+unmapped) for FCRA & Non FCRA; FFS=0
+  const gArr = FIN_BOOKS.map((b,i) => b === 'FFS' ? 0 : d.empExp[i] + d.progExp[i] + d.adminExp[i] + d.unmappedExp[i]);
+  d.grants   = [...gArr, gArr.reduce((a,v)=>a+v,0)];
+
+  d.totalIncome = FIN_A4(FIN_A4(d.grants, d.otherInc), d.saleSvc);
+  d.totalExp    = FIN_A4(FIN_A4(FIN_A4(FIN_A4(FIN_A4(d.empExp, d.progExp), d.adminExp), d.unmappedExp), d.depr), d.finCost);
+  d.surplus     = FIN_S4(d.totalIncome, d.totalExp);
+
+  // ── Note 3 — Unrestricted Fund (opening + movements) ──
+  // A) Corpus Fund (credit balance equity — negate opening = opening balance shown)
+  d.n3CorpusOb  = fin_V('Corpus Fund Reserve', -1, 0);
+  d.n3Corpus    = fin_V('Corpus Fund Reserve', -1, 3);
+
+  // B) General Fund Reserve — opening + surplus
+  d.n3GfrOb     = fin_V('General Fund Reserve', -1, 0);
+  d.n3GfrCl     = FIN_A4(d.n3GfrOb, d.surplus);
+
+  // C) ICR Reserve — opening + ICR for the year (mapped directly in Financials_Mapping)
+  d.n3IcrOb     = fin_V('Indirect Cost Recovery Reserve', -1, 0);
+  d.n3IcrAdd    = fin_V('ICR for the year', 1, 3);   // closing balance of IDC Expense rows
+  d.n3IcrLess   = [0,0,0,0];
+  d.n3IcrCl     = FIN_A4(FIN_A4(d.n3IcrOb, d.n3IcrAdd), d.n3IcrLess);
+
+  d.n3Total     = FIN_A4(FIN_A4(d.n3Corpus, d.n3GfrCl), d.n3IcrCl);
+
+  // ── Note 4 — Restricted Funds ──
+  // Opening = -(opening of Restricted Fund Reserve + opening of Grant Receivable)
+  const rfrOb4 = FIN_BOOKS.map(b => fin_G('Restricted Fund Reserve', b, 0) + fin_G('Grant Receivable', b, 0));
+  d.n4Ob        = [...rfrOb4.map(v => -v), -rfrOb4.reduce((a,v)=>a+v,0)];
+  // Add: Grant received = -(closing - opening) of Restricted Fund Reserve
+  const rfrCl4 = FIN_BOOKS.map(b => fin_G('Restricted Fund Reserve', b, 3));
+  const rfrOb4b= FIN_BOOKS.map(b => fin_G('Restricted Fund Reserve', b, 0));
+  d.n4GrntAdd   = [...FIN_BOOKS.map((_,i) => -(rfrCl4[i] - rfrOb4b[i])), 0];
+  d.n4GrntAdd[3]= d.n4GrntAdd.slice(0,3).reduce((a,v)=>a+v,0);
+  // Less: Grant income recognised = grants (cost-recovery) from I&E
+  d.n4GrntRcgd  = [...d.grants];
+  // Less: ICR transfer = same as n3IcrAdd
+  d.n4IcrTrf    = [...d.n3IcrAdd];
+  // Less: Grant refunded = 0 (no data in TB)
+  d.n4GrntRefund= [0,0,0,0];
+  // Total Restricted = Opening + Add - Less(grant recognised) - Less(ICR) - Less(refunded)
+  d.n4Total     = FIN_S4(FIN_S4(FIN_S4(FIN_A4(d.n4Ob, d.n4GrntAdd), d.n4GrntRcgd), d.n4IcrTrf), d.n4GrntRefund);
+
+  // ── Notes 5–7 — Liabilities (credit balance = negative closing → negate) ──
+  d.n5Pay     = fin_V('Other Trade Payables', -1);
+  d.n6Tds     = fin_V('TDS Payable', -1);
+  d.n6Gst     = fin_V('GST Payable', -1);
+  d.n6Epf     = fin_V('Employees state insurance & provident fund payable', -1);
+  d.n6Emp     = fin_V('Employee benefits payable', -1);
+  d.n6Total   = FIN_A4(FIN_A4(FIN_A4(d.n6Tds, d.n6Gst), d.n6Epf), d.n6Emp);
+  d.n7Ca      = fin_V('Provision for Compensated Absences', -1);
+  d.n7Grat    = fin_V('Provision for gratuity', -1);
+  d.n7Total   = FIN_A4(d.n7Ca, d.n7Grat);
+
+  // ── Notes 8–11 — Assets (debit balance = positive closing) ──
+  d.n8Sec     = fin_V('Security Deposits');
+  d.n9Bank    = fin_V('Cash & Bank');
+  d.n9Fd      = fin_V('Fixed Deposits');
+  d.n9Total   = FIN_A4(d.n9Bank, d.n9Fd);
+  d.n10Vend   = fin_V('Vendor Advances');
+  d.n10Pre    = fin_V('Prepaid expense');
+  d.n10Tds    = fin_V('TDS Receivable');
+  d.n10Total  = FIN_A4(FIN_A4(d.n10Vend, d.n10Pre), d.n10Tds);
+  d.n11Int    = fin_V('Interest accrued but not due on deposits');
+
+  // ── Fixed Assets ──
+  d.bsFA      = fin_V('Fixed Assets');
+  d.bsING     = fin_V('Fixed Assets - ING');
+
+  // ── Balance Sheet totals ──
+  d.bsSrc = FIN_A4(FIN_A4(FIN_A4(FIN_A4(d.n3Total, d.n4Total), d.n5Pay), d.n6Total), d.n7Total);
+  d.bsApp = FIN_A4(FIN_A4(FIN_A4(FIN_A4(FIN_A4(d.bsFA, d.bsING), d.n8Sec), d.n9Total), d.n10Total), d.n11Int);
+  d.bsDiff= FIN_S4(d.bsApp, d.bsSrc);
+}
+async function loadFinancials(){try{const[tbRes,mapRes]=await Promise.all([fetch(REPO_TB_URL),fetch(REPO_MAP_URL)]);if(!tbRes.ok||!mapRes.ok)throw new Error('Fetch failed');fin_parseMapping(await mapRes.arrayBuffer());fin_parseTB(await tbRes.arrayBuffer());fin_compute();renderFinancials();finDataLoaded=true;}catch(e){document.getElementById('fin-loading').textContent='Could not load: '+e.message;}}
+let finDataLoaded=false;
+function renderFinancials(){document.getElementById('fin-loading').style.display='none';const d=FIN_DATA,sp=d.surplus[3]>=0;document.getElementById('fin-kpi-grid').innerHTML=[{l:'Total Income',v:fmt(d.totalIncome[3]),col:'#1a6b4a'},{l:'Total Expenditure',v:fmt(d.totalExp[3]),col:'#c8400c'},{l:'Surplus/(Deficit)',v:fmt(d.surplus[3]),col:sp?'#1a6b4a':'#c8400c'},{l:'Total Assets',v:fmt(d.bsApp[3]),col:'#1a6b9a'}].map(k=>'<div class="kpi-card" style="border-left-color:'+k.col+'"><div class="kpi-label">'+k.l+'</div><div class="kpi-value" style="font-size:17px;">'+k.v+'</div></div>').join('');renderFinTab('bs');}
+function finTab(tab,el){document.querySelectorAll('.fst').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderFinTab(tab);}
+function fRow(label,vals,isTot,isInd){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--cream);'+(isTot?'font-weight:700;':'')+'"><div style="font-size:'+(isInd?'11':'12')+'px;color:'+(isInd?'var(--muted)':'var(--ink)')+';flex:1;'+(isInd?'padding-left:12px;':'')+'">' +label+ '</div><div style="display:flex;gap:4px;">' +[0,1,2,3].map(i=>'<div style="font-family:DM Mono,monospace;font-size:11px;text-align:right;min-width:58px;'+(isTot&&i===3?'color:var(--accent);':'')+'">'+(vals&&(vals[i]||vals[i]===0)?inr(Math.round(vals[i])):'-')+'</div>').join('')+ '</div></div>';}
+function fHdr(label){return '<div style="display:flex;justify-content:space-between;background:var(--ink);margin:0 -16px;padding:8px 16px;"><div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7);">' +label+ '</div><div style="display:flex;gap:4px;">' +['FCRA','N.FCRA','FFS','TOTAL'].map(h=>'<div style="font-size:9px;color:rgba(255,255,255,.4);min-width:58px;text-align:right;">'+h+'</div>').join('')+ '</div></div>';}
+function renderFinTab(tab){const d=FIN_DATA;if(!d.totalIncome)return;let html='';
+  if(tab==='bs'){html='<div class="mob-card">'+fHdr('SOURCES OF FUNDS')+fRow('Unrestricted Funds',d.n3Total,false,true)+fRow('Restricted Funds',d.n4Total,false,true)+fRow('Trade Payables',d.n5Pay,false,true)+fRow('Other Current Liab.',d.n6Total,false,true)+fRow('Provisions',d.n7Total,false,true)+fRow('Total Sources',d.bsSrc,true,false)+fHdr('APPLICATION OF FUNDS')+fRow('Fixed Assets',FIN_A4(d.bsFA,d.bsING),false,true)+fRow('Security Deposits',d.n8Sec,false,true)+fRow('Cash & Bank',d.n9Total,false,true)+fRow('Advances & Prepaid',d.n10Total,false,true)+fRow('Accrued Income',d.n11Int,false,true)+fRow('Total Application',d.bsApp,true,false)+'</div>';}
+  else if(tab==='ie'){html='<div class="mob-card">'+fHdr('INCOME')+fRow('Donation & Grants',d.grants,false,true)+fRow('Sale of Services',d.saleSvc,false,true)+fRow('Other Income',d.otherInc,false,true)+fRow('Total Income',d.totalIncome,true,false)+fHdr('EXPENDITURE')+fRow('Employee Benefits',d.empExp,false,true)+fRow('Programme Expenses',d.progExp,false,true)+fRow('Administrative',d.adminExp,false,true)+fRow('Depreciation',d.depr,false,true)+fRow('Finance Cost',d.finCost,false,true)+fRow('Unmapped',d.unmappedExp,false,true)+fRow('Total Expenditure',d.totalExp,true,false)+fRow('Surplus/(Deficit)',d.surplus,true,false)+'</div>';}
+  else{html='<div class="mob-card">'+fHdr('NOTE 3 — Unrestricted Funds')+fRow('Corpus Fund',d.n3Corpus,false,true)+fRow('General Fund Reserve',d.n3GfrCl,false,true)+fRow('ICR Reserve',d.n3IcrCl,false,true)+fRow('Total Unrestricted',d.n3Total,true,false)+fHdr('NOTE 4 — Restricted Funds')+fRow('Opening Balance',d.n4Ob,false,true)+fRow('Grant Received',d.n4GrntAdd,false,true)+fRow('Less: Grant Recognised',d.n4GrntRcgd,false,true)+fRow('Total Restricted',d.n4Total,true,false)+fHdr('NOTE 5 — Trade Payables')+fRow('Trade Payables',d.n5Pay,false,true)+fRow('Total',d.n5Pay,true,false)+fHdr('NOTE 6 — Other Current Liabilities')+fRow('TDS Payable',d.n6Tds,false,true)+fRow('GST Payable',d.n6Gst,false,true)+fRow('EPF/ESI Payable',d.n6Epf,false,true)+fRow('Employee Benefits Payable',d.n6Emp,false,true)+fRow('Total',d.n6Total,true,false)+fHdr('NOTE 7 — Provisions')+fRow('Compensated Absences',d.n7Ca,false,true)+fRow('Gratuity',d.n7Grat,false,true)+fRow('Total',d.n7Total,true,false)+fHdr('NOTE 8 — Security Deposits')+fRow('Security Deposits',d.n8Sec,false,true)+fRow('Total',d.n8Sec,true,false)+fHdr('NOTE 9 — Cash & Bank')+fRow('Bank Balances',d.n9Bank,false,true)+fRow('Fixed Deposits',d.n9Fd,false,true)+fRow('Total',d.n9Total,true,false)+fHdr('NOTE 10 — Current Assets')+fRow('Vendor Advances',d.n10Vend,false,true)+fRow('Prepaid Expenses',d.n10Pre,false,true)+fRow('TDS Receivable',d.n10Tds,false,true)+fRow('Total',d.n10Total,true,false)+fHdr('NOTE 11 — Accrued Income')+fRow('Interest Accrued',d.n11Int,false,true)+fRow('Total',d.n11Int,true,false)+'</div>';}
+  document.getElementById('fin-content').innerHTML=html;
+}
+function mobNav(page,btn){document.querySelectorAll('.mob-page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('page-'+page).classList.add('active');btn.classList.add('active');if(page==='vendors'){vendorPage=1;renderVendors();}if(page==='transactions'){txnPage=1;renderTxns();}const role=sessionStorage.getItem('lehs_role');if(page==='personnel'&&role==='admin'){personnelPage=1;renderPersonnel();}if(page==='financials'&&role==='admin'&&!finDataLoaded)loadFinancials();window.scrollTo(0,0);}
+
+  // Mobile login handler - override desktop pgCheck success path
+  window.doMobileLogin = function(role) {
+    sessionStorage.setItem('lehs_role', role);
+    var pwd = document.getElementById('pwd-gate'); if(pwd) pwd.style.display='none';
+    var badge = document.getElementById('mob-role-badge'); if(badge) badge.textContent = role==='admin'?'Admin':'User';
+    if(role==='admin'){
+      var np=document.getElementById('nav-personnel'); if(np) np.style.display='flex';
+      var nf=document.getElementById('nav-financials'); if(nf) nf.style.display='flex';
+    }
+    document.getElementById('splash').style.display='flex';
+    loadData();
+  };
+
+  // Check session
+  (function checkSession() {
+    var role = sessionStorage.getItem('lehs_role');
+    if (role==='admin'||role==='user') { window.doMobileLogin(role); }
+  })();
+
+  // Wire pgCheck for mobile
+  window.pgCheck = async function() {
+    var input = document.getElementById('pg-pwd').value;
+    var err = document.getElementById('pg-err');
+    if(err) { err.className='pg-err show'; err.style.display='none'; }
+    if(!input) { if(err){err.textContent='Please enter the password.';err.style.display='block';} return; }
+    if(input==='LEHS@Admin_2027'){ window.doMobileLogin('admin'); return; }
+    if(input==='LEHS@demo_2021'){ window.doMobileLogin('user'); return; }
+    try {
+      var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+      var hex = Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+      var AH='af693f3455e416fcbf93abada6b65605d1a4fa9dbdbfea9bee5981ab403b2602';
+      var UH='abc23ba941557fc9ad8379c988db4bf3dab29d41d63f123e9513589476bfd9f1';
+      if(hex===AH||hex===UH){ window.doMobileLogin(hex===AH?'admin':'user'); return; }
+    } catch(e){}
+    if(err){err.textContent='Incorrect password.';err.style.display='block';}
+    document.getElementById('pg-pwd').value='';
+  };
+})();
 </script>
+
+<!-- MOBILE VIEW -->
+<div id="mob-view">
+<!-- PASSWORD GATE -->
+<div id="pwd-gate">
+  <div class="pg-grid"></div>
+  <div class="pg-glow"></div>
+  <div class="pg-corner pg-tl"></div>
+  <div class="pg-corner pg-tr"></div>
+  <div class="pg-corner pg-bl"></div>
+  <div class="pg-corner pg-br"></div>
+  <div class="pg-box">
+    <div class="pg-badge">LEHS · Wadhwani AI</div>
+    <h1 class="pg-title">LEHS <em>Dashboard</em></h1>
+    <p class="pg-sub">Restricted Access</p>
+    <div class="pg-card">
+      <div class="pg-label">Password</div>
+      <input class="pg-input" id="pg-pwd" type="password" placeholder="Enter password" onkeydown="if(event.key==='Enter')pgCheck()">
+      <button class="pg-btn" onclick="pgCheck()">Access Dashboard →</button>
+      <div class="pg-err" id="pg-err">Incorrect password. Please try again.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SPLASH / LOADING -->
+<div id="splash" style="display:none;">
+  <div class="sp-grid"></div>
+  <div class="sp-glow"></div>
+  <div class="sp-content">
+    <div class="sp-badge">LEHS · Wadhwani AI</div>
+    <h1 class="sp-title">Expense <em>Dashboard</em></h1>
+    <p class="sp-sub">Loading data…</p>
+    <div class="sp-bar"><div class="sp-fill"></div></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <header class="mob-header">
+    <div>
+      <div class="mob-logo">LEHS <span>Dashboard</span></div>
+      <div class="mob-period" id="mob-period">Loading…</div>
+    </div>
+    <div style="font-size:11px;color:rgba(255,255,255,.4);font-family:DM Mono,monospace;" id="mob-role-badge"></div>
+  </header>
+
+  <!-- OVERVIEW PAGE -->
+  <div class="mob-page active" id="page-overview">
+    <div class="kpi-grid" id="mob-kpi"></div>
+    <div class="mob-card">
+      <div class="mob-card-title">Spend by Domain</div>
+      <div class="mob-card-sub">All funds combined</div>
+      <div class="chart-wrap" style="height:280px;"><canvas id="chart-domain"></canvas></div>
+    </div>
+    <div class="mob-card">
+      <div class="mob-card-title">Spend by Source</div>
+      <div class="mob-card-sub">FCRA · Non FCRA · FFS</div>
+      <div class="chart-wrap"><canvas id="chart-source"></canvas></div>
+    </div>
+    <div class="mob-card"><div class="mob-card-title">Monthly Trend</div><div class="mob-card-sub">Total expense by month</div><div class="chart-wrap"><canvas id="chart-monthly"></canvas></div></div>
+    <div class="mob-card"><div class="mob-card-title">Budget Line Item</div><div class="mob-card-sub">Excl. IDC</div><div class="chart-wrap"><canvas id="chart-budget"></canvas></div></div>
+    <div class="mob-card"><div class="mob-card-title">Spend by Donor</div><div class="chart-wrap"><canvas id="chart-donor"></canvas></div></div>
+    <div class="mob-card"><div class="mob-card-title">Spend by Solution</div><div class="chart-wrap"><canvas id="chart-solution"></canvas></div></div>
+  </div>
+
+  <!-- BUDGET PAGE -->
+  <div class="mob-page" id="page-budget">
+    <div class="mob-filters" id="budget-src-filters" style="padding:12px 16px 4px;"></div>
+    <div class="mob-card">
+      <div class="mob-card-title">Budget Line Item</div>
+      <div class="mob-card-sub" id="budget-sub">Excl. IDC</div>
+      <div id="budget-list"></div>
+    </div>
+  </div>
+
+  <!-- VENDORS PAGE -->
+  <div class="mob-page" id="page-vendors">
+    <div class="mob-card">
+      <div class="mob-card-title">Top Vendors</div>
+      <div class="mob-card-sub">By total spend</div>
+      <input class="mob-search" id="vendor-search" placeholder="Search vendor…" oninput="renderVendors()">
+      <div class="mob-table-wrap">
+        <table class="mob-table">
+          <thead><tr><th>Vendor</th><th style="text-align:right">Amount</th></tr></thead>
+          <tbody id="vendor-body"></tbody>
+        </table>
+      </div>
+      <button class="btn-more" id="vendor-more" onclick="vendorPage++;renderVendors()">Load more</button>
+    </div>
+  </div>
+
+  <!-- TRANSACTIONS PAGE -->
+
+
+  <div class="mob-page" id="page-personnel">
+    <div class="mob-card" style="margin-top:12px;"><div class="mob-card-title">Personnel Cost</div><div class="mob-card-sub" id="personnel-sub"></div></div>
+    <div class="mob-filters" id="dept-filter" style="padding:0 16px 8px;"></div>
+    <div style="margin:0 16px 10px;"><input class="mob-search" id="personnel-search" placeholder="Search name, designation..." oninput="personnelPage=1;renderPersonnel()" style="width:100%;"></div>
+    <div class="mob-card"><div class="mob-card-title" style="margin-bottom:12px;">Cost by Department</div><div id="dept-bars"></div></div>
+    <div class="mob-card" style="padding:0 16px;"><div id="personnel-list"></div></div>
+    <button class="btn-more" id="personnel-more" onclick="personnelPage++;renderPersonnel()">Load more</button>
+  </div>
+  <div class="mob-page" id="page-financials">
+    <div id="fin-kpi-grid" class="kpi-grid" style="margin-top:12px;"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 8px;">
+      <button class="fst active" onclick="finTab('bs',this)">Balance Sheet</button>
+      <button class="fst" onclick="finTab('ie',this)">Income &amp; Expenditure</button>
+      <button class="fst" onclick="finTab('sc',this)">Schedules</button>
+    </div>
+    <div id="fin-content"></div>
+    <div id="fin-loading" style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">Loading financial data...</div>
+  </div>
+  <!-- BOTTOM NAV -->
+  <nav class="mob-nav">
+    <button class="mob-nav-btn active" onclick="mobNav('overview',this)">
+      <span class="nav-icon">📊</span>Overview
+    </button>
+    <button class="mob-nav-btn" onclick="mobNav('budget',this)">
+      <span class="nav-icon">📋</span>Budget
+    </button>
+    <button class="mob-nav-btn" onclick="mobNav('vendors',this)">
+      <span class="nav-icon">🏢</span>Vendors
+    </button>
+
+    <button class="mob-nav-btn" id="nav-personnel" style="display:none;" onclick="mobNav('personnel',this)"><span class="nav-icon">👥</span>Personnel</button>
+    <button class="mob-nav-btn" id="nav-financials" style="display:none;" onclick="mobNav('financials',this)"><span class="nav-icon">📑</span>Finance</button>
+  </nav>
+</div>
+</div>
 </body>
 </html>
