@@ -422,26 +422,27 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
 <body>
 <!-- ══ PASSWORD GATE ══ -->
 <style>
-#pwd-gate{position:fixed;inset:0;background:#080b14;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;}
-#pwd-gate .pg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(46,160,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(46,160,255,.06) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;}
-#pwd-gate .pg-glow{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(46,160,255,.1) 0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
-#pwd-gate .pg-corner{position:absolute;width:22px;height:22px;border-color:rgba(46,160,255,.35);border-style:solid;}
+#pwd-gate{position:fixed;inset:0;background:#f5f0e8;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;}
+#pwd-gate .pg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,0,0,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.04) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;}
+#pwd-gate .pg-glow{display:none;}
+#pwd-gate .pg-corner{position:absolute;width:22px;height:22px;border-color:rgba(200,64,12,.25);border-style:solid;}
 #pwd-gate .pg-tl{top:20px;left:20px;border-width:1px 0 0 1px;}
 #pwd-gate .pg-tr{top:20px;right:20px;border-width:1px 1px 0 0;}
 #pwd-gate .pg-bl{bottom:20px;left:20px;border-width:0 0 1px 1px;}
 #pwd-gate .pg-br{bottom:20px;right:20px;border-width:0 1px 1px 0;}
 #pwd-gate .pg-box{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;}
-#pwd-gate .pg-badge{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#2ea0ff;border:1px solid rgba(46,160,255,.3);padding:5px 16px;border-radius:99px;margin-bottom:20px;}
-#pwd-gate .pg-title{font-family:'DM Serif Display',serif;font-size:clamp(28px,4vw,42px);color:#fff;margin:0 0 6px;text-align:center;}
-#pwd-gate .pg-title em{font-style:italic;color:#2ea0ff;}
-#pwd-gate .pg-sub{font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.08em;text-transform:uppercase;margin-bottom:36px;}
-#pwd-gate .pg-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px 36px;display:flex;flex-direction:column;gap:14px;min-width:300px;}
-#pwd-gate .pg-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:-6px;}
-#pwd-gate .pg-input{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:12px 16px;font-size:15px;color:#fff;font-family:'DM Mono',monospace;letter-spacing:.1em;outline:none;transition:border-color .2s;}
-#pwd-gate .pg-input:focus{border-color:#2ea0ff;}
-#pwd-gate .pg-btn{background:#2ea0ff;color:#fff;border:none;border-radius:8px;padding:13px;font-family:'Sora',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s;}
-#pwd-gate .pg-btn:hover{background:#1a8de8;}
-#pwd-gate .pg-err{font-size:12px;color:#ff6b6b;text-align:center;min-height:16px;display:none;}
+#pwd-gate .pg-badge{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#c8400c;border:1px solid rgba(200,64,12,.3);padding:5px 16px;border-radius:99px;margin-bottom:20px;}
+#pwd-gate .pg-title{font-family:'DM Serif Display',serif;font-size:clamp(28px,4vw,42px);color:#0d0d0d;margin:0 0 6px;text-align:center;}
+#pwd-gate .pg-title em{font-style:italic;color:#c8400c;}
+#pwd-gate .pg-sub{font-size:11px;color:#6b6560;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
+#pwd-gate .pg-fy{font-size:12px;color:#6b6560;letter-spacing:.05em;margin-bottom:32px;}
+#pwd-gate .pg-card{background:#fff;border:1px solid #ccc7bc;border-radius:16px;padding:32px 36px;display:flex;flex-direction:column;gap:14px;min-width:300px;box-shadow:0 4px 24px rgba(0,0,0,.07);}
+#pwd-gate .pg-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6b6560;margin-bottom:-6px;}
+#pwd-gate .pg-input{background:#f5f0e8;border:1px solid #ccc7bc;border-radius:8px;padding:12px 16px;font-size:15px;color:#0d0d0d;font-family:'DM Mono',monospace;letter-spacing:.1em;outline:none;transition:border-color .2s;}
+#pwd-gate .pg-input:focus{border-color:#c8400c;}
+#pwd-gate .pg-btn{background:#c8400c;color:#fff;border:none;border-radius:8px;padding:13px;font-family:'Sora',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s;}
+#pwd-gate .pg-btn:hover{background:#a33208;}
+#pwd-gate .pg-err{font-size:12px;color:#c8400c;text-align:center;min-height:16px;display:none;}
 #pwd-gate .pg-err.show{display:block;}
 </style>
 
@@ -454,8 +455,9 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
   <div class="pg-corner pg-br"></div>
   <div class="pg-box">
     <div class="pg-badge">LEHS · Wadhwani AI</div>
-    <h1 class="pg-title">LEHS <em>Dashboard</em></h1>
+    <h1 class="pg-title">LEHS <em>Finance Dashboard</em></h1>
     <p class="pg-sub">Restricted Access</p>
+    <p class="pg-fy">FY 2025 – 2026</p>
     <div class="pg-card">
       <div class="pg-label">Password</div>
       <input class="pg-input" id="pg-pwd" type="password" placeholder="Enter password" onkeydown="if(event.key==='Enter')pgCheck()">
