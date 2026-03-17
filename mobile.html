@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 :root{--ink:#0d0d0d;--paper:#f5f0e8;--cream:#ede8dc;--card:#fff;--accent:#c8400c;--accent2:#1a6b4a;--accent3:#1a6b9a;--gold:#c8960c;--muted:#6b6560;--border:#ddd8ce;}
@@ -395,12 +396,49 @@ function mkChart(id,type,labels,data,colors){
   if(charts[id])charts[id].destroy();
   const ctx=document.getElementById(id);if(!ctx)return;
   const isBar=type==='bar';
-  charts[id]=new Chart(ctx,{type,
-    data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:isBar?0:2,borderColor:'#fff',borderRadius:isBar?4:0}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:!isBar,position:'bottom',labels:{font:{size:10,family:'Sora'},padding:10,boxWidth:10}}},
-      scales:isBar?{x:{grid:{display:false},ticks:{font:{size:9},color:'#6b6560',maxRotation:45,minRotation:30,maxTicksLimit:12}},
-        y:{grid:{display:false},ticks:{font:{size:9},color:'#6b6560',callback:v=>fmt(v)}}}:{}}});
+
+  charts[id]=new Chart(ctx,{
+    type,
+    data:{
+      labels,
+      datasets:[{
+        data,
+        backgroundColor:colors,
+        borderWidth:isBar?0:2,
+        borderColor:'#fff',
+        borderRadius:isBar?4:0
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{
+          display:!isBar,
+          position:'bottom',
+          labels:{font:{size:10,family:'Sora'},padding:10,boxWidth:10}
+        },
+        datalabels:{
+          color:'#000',
+          anchor:'end',
+          align:'top',
+          font:{size:9,weight:'600'},
+          formatter:(value)=>fmt(value)
+        }
+      },
+      scales:isBar?{
+        x:{
+          grid:{display:false},
+          ticks:{font:{size:9},color:'#6b6560',maxRotation:45,minRotation:30,maxTicksLimit:12}
+        },
+        y:{
+          grid:{display:false},
+          ticks:{font:{size:9},color:'#6b6560',callback:v=>fmt(v)}
+        }
+      }:{}
+    },
+    plugins:[ChartDataLabels]
+  });
 }
 
 function renderOverview(){
