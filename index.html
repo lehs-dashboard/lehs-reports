@@ -1486,9 +1486,6 @@ function initDashboard() {
   document.getElementById('upload-screen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
 
-  // Save dateFilter before rebuilding — so refresh preserves active date range
-  const savedDateFilter = Object.assign({}, dateFilter);
-
   const fieldDefs = [
     { wrapperId: 'ms-source',   field: 'source',   placeholder: 'All' },
     { wrapperId: 'ms-donor',    field: 'donor',    placeholder: 'All' },
@@ -1515,20 +1512,6 @@ function initDashboard() {
   });
 
   applyAllFilters();
-
-  // Restore dateFilter after rebuild — in case initDashboard was called mid-session
-  if (savedDateFilter.fromMK || savedDateFilter.toMK || savedDateFilter.from || savedDateFilter.to) {
-    dateFilter = savedDateFilter;
-    if (savedDateFilter.from) {
-      const f = String(savedDateFilter.from).padStart(8,'0');
-      const t = String(savedDateFilter.to).padStart(8,'0');
-      const toInput = n => n.slice(0,4)+'-'+n.slice(4,6)+'-'+n.slice(6,8);
-      document.getElementById('date-from').value = toInput(f);
-      document.getElementById('date-to').value   = toInput(t);
-    }
-    updateHdrBadge();
-    applyAllFilters();
-  }
 
   // Auto-fetch employee mapping from GitHub silently on load
   fetchMappingFromGitHub(true);
@@ -1621,14 +1604,10 @@ function onDateChange() {
 function applyAllFilters() {
   filtered = rawData.filter(r => {
     // ── DATE RANGE FILTER ── uses monthKey (always available) + dateNum for day precision
-    // ── DATE RANGE FILTER ── primarykey: monthKey (YYYY-MM always set)
-    if (dateFilter.fromMK || dateFilter.toMK) {
-      const mk = r.monthKey;
-      if (!mk || mk === 'Unknown') return false;
-      if (dateFilter.fromMK && mk < dateFilter.fromMK) return false;
-      if (dateFilter.toMK   && mk > dateFilter.toMK)   return false;
-    } else if (dateFilter.from || dateFilter.to) {
-      let dn = r.dateNum || parseDateNum(r.date);
+    // ── DATE RANGE FILTER ──
+    if (dateFilter.fromMK || dateFilter.toMK || dateFilter.from || dateFilter.to) {
+      // Use dateNum (YYYYMMDD) for precise day-level filtering
+      const dn = r.dateNum || parseDateNum(r.date);
       if (!dn) return false;
       if (dateFilter.from && dn < dateFilter.from) return false;
       if (dateFilter.to   && dn > dateFilter.to)   return false;
@@ -1659,9 +1638,10 @@ function applyAllFilters() {
   });
 
   currentPage = 1;
-  console.log('[LEHS] applyAllFilters: dateFilter=', JSON.stringify(dateFilter), 'rawData=', rawData.length, 'filtered=', filtered.length, 'sample mk=', rawData[0]?.monthKey);
   renderKPIs();
   renderAllCharts();
+  // Force Chart.js to resize after data update
+  setTimeout(() => { Object.values(chartInstances).forEach(c => { try { c.resize(); } catch(e){} }); }, 50);
   renderChips();
   if (document.getElementById('page-transactions').classList.contains('active')) renderTable();
   if (document.getElementById('page-pivot').classList.contains('active')) renderPivot();
@@ -2049,6 +2029,8 @@ function updateCardHighlights() {
    RENDER ALL CHARTS
 ═══════════════════════════════════════ */
 function renderAllCharts() {
+  // Disable animations for instant filter response
+  Chart.defaults.animation = false;
   makeMonthlyBar('chart-monthly', aggregateMonthly());
   makeBarH('chart-domain', aggregate('domain'), 'domain');
   makeDoughnutPct('chart-donor-pie', aggregate('donor'), 'donor');
@@ -2705,7 +2687,19 @@ async function loadFromDrive() {
 
     loadingText.textContent = 'Loading…';
     if (statusEl) statusEl.textContent = '';
+    const savedDF = Object.assign({}, dateFilter); // preserve date filter across refresh
     parseArrayBuffer(arrayBuffer, fileName);
+    // Restore date filter after re-init (parseArrayBuffer → initDashboard resets filtered)
+    if (savedDF.fromMK || savedDF.toMK || savedDF.from || savedDF.to) {
+      dateFilter = savedDF;
+      if (savedDF.from) {
+        const toInput = n => String(n).padStart(8,'0').replace(/(\d{4})(\d{2})(\d{2})/,'$1-$2-$3');
+        document.getElementById('date-from').value = toInput(savedDF.from);
+        document.getElementById('date-to').value   = toInput(savedDF.to);
+      }
+      updateHdrBadge();
+      applyAllFilters();
+    }
 
   } catch (err) {
     loadingBar.style.display = 'none';
