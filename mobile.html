@@ -156,7 +156,6 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
   <header class="hdr">
     <div class="hdr-logo">LEHS <em>Dashboard</em></div>
     <div class="hdr-r">
-      <span class="period" id="hdr-period"></span>
       <span class="role-badge" id="hdr-role"></span>
     </div>
   </header>
@@ -382,7 +381,7 @@ function parseExp(buf){
       budget:clean(r[cBudget]),project:clean(r[cProj]),grant:clean(r[cGrant]),amount:amt});
   }
   const dates=rawData.map(r=>r.date).filter(Boolean);
-  if(dates.length)document.getElementById('hdr-period').textContent=dates[0]+' \u2013 '+dates[dates.length-1];
+
   document.getElementById('splash').style.display='none';
   document.getElementById('app').style.display='block';
   renderOverview();renderBudget();renderVendors();
