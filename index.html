@@ -1132,9 +1132,80 @@ function processFile(file) {
   reader.readAsArrayBuffer(file);
 }
 
+
+function parseCSVData(csvText, fileName) {
+  try {
+    const rows = csvToRows(csvText);
+    if (!rows.length) { alert('No data found in CSV.'); return; }
+
+    // Reuse parseArrayBuffer by converting CSV rows to the expected format
+    // Find header row
+    let hRow = 0;
+    for (let i = 0; i < Math.min(10, rows.length); i++) {
+      if (rows[i].some(c => typeof c === 'string' && (c.toUpperCase().includes('SOURCE') || c.toUpperCase().includes('AMOUNT')))) {
+        hRow = i; break;
+      }
+    }
+
+    const headers = rows[hRow].map(h => (h || '').toString().trim().toUpperCase());
+    const colMap = {};
+    headers.forEach((h, i) => colMap[h] = i);
+
+    const getCol = (...names) => {
+      for (const n of names) {
+        if (colMap[n] !== undefined) return colMap[n];
+        const k = Object.keys(colMap).find(c => c.includes(n));
+        if (k !== undefined) return colMap[k];
+      }
+      return -1;
+    };
+
+    const cSrc=getCol('SOURCE'), cDate=getCol('BILL_DATE','DATE'), cVoucher=getCol('VOUCHER_NO','VOUCHER');
+    const cVendor=getCol('VENDOR_NAME','VENDOR NAME'), cEmpVend=getCol('EMPLOYEE/VENDOR','EMPLOYEE');
+    const cAccount=getCol('ACCOUNT_NAME','ACCOUNT NAME','ACCOUNT'), cAccType=getCol('ACCOUNT_TYPE','ACCOUNT TYPE');
+    const cDonor=getCol('DONOR'), cDomain=getCol('DOMAIN'), cSolution=getCol('SOLUTIONS','SOLUTION');
+    const cLocation=getCol('LOCATION'), cAmount=getCol('TOTAL AMOUNT','AMOUNT');
+    const cBudget=getCol('BUDGET_LINE_ITEM','BUDGET LINE ITEM','BUDGET_LINE','BUDGET');
+    const cProject=getCol('PROJECT_ID','PROJECT ID','PROJECT'), cGrant=getCol('GRANT_ID','GRANT ID','GRANT');
+
+    rawData = [];
+    for (let i = hRow + 1; i < rows.length; i++) {
+      const r = rows[i];
+      if (!r || !r.length) continue;
+      const rawAmt = r[cAmount];
+      if (rawAmt === '' || rawAmt === undefined || rawAmt === null) continue;
+      const amt = parseFloat((rawAmt || '').toString().replace(/[^0-9.-]/g, ''));
+      if (isNaN(amt) || amt === 0) continue;
+      const dateStr = formatDate(r[cDate]);
+      const vendorVal = cVendor >= 0 ? r[cVendor] : (cEmpVend >= 0 ? r[cEmpVend] : '');
+      const srcVal = clean(r[cSrc]);
+      const donorRaw = clean(r[cDonor]);
+      rawData.push({
+        source: srcVal, date: dateStr, monthKey: parseMonthKey(dateStr),
+        dateNum: parseDateNum(dateStr), voucher: clean(r[cVoucher]),
+        vendor: clean(vendorVal), empVendor: clean(cEmpVend >= 0 ? r[cEmpVend] : vendorVal),
+        account: clean(r[cAccount]), accountType: clean(r[cAccType]),
+        donor: mapDonor(srcVal, donorRaw), domain: clean(r[cDomain]),
+        solution: clean(r[cSolution]), location: clean(r[cLocation]),
+        budget: clean(r[cBudget]), project: clean(r[cProject]),
+        grant: clean(r[cGrant]), amount: amt
+      });
+    }
+
+    if (rawData.length === 0) { alert('No data rows found. Check CSV format.\nHeaders: ' + headers.join(', ')); return; }
+    const fb = document.getElementById('file-badge'); if (fb) fb.textContent = fileName;
+    document.getElementById('btn-refresh').style.display = 'inline-block';
+    document.getElementById('upload-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    initDashboard();
+  } catch(err) {
+    alert('Error reading CSV: ' + err.message);
+  }
+}
+
 function parseArrayBuffer(arrayBuffer, fileName) {
   try {
-      const wb = XLSX.read(arrayBuffer, { type: 'array', cellDates: false });
+      const wb = XLSX.read(arrayBuffer, { type: 'array', cellDates: true });
       const ws = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
 
@@ -1267,32 +1338,22 @@ const EMP_MAP = {"AI-E-002": {"designation": "Lead - Talent and HR Operations", 
 function formatDate(v) {
   if (!v || v === '') return 'Unspecified';
 
-  // Excel serial number (primary path with cellDates:false)
-  // Use UTC to avoid IST timezone shifting date by -1
-  if (typeof v === 'number' && v > 1000) {
-    const ms = Math.round((v - 25569) * 86400 * 1000);
-    const d = new Date(ms);
-    if (!isNaN(d.getTime())) {
-      return String(d.getUTCDate()).padStart(2,'0') + '/' +
-             String(d.getUTCMonth()+1).padStart(2,'0') + '/' +
-             String(d.getUTCFullYear()).slice(-2);
-    }
-  }
-
-  // JS Date object fallback
+  // JS Date object (from cellDates:true + raw:true)
   if (v instanceof Date) {
     if (isNaN(v.getTime())) return 'Unspecified';
-    return String(v.getUTCDate()).padStart(2,'0') + '/' +
-           String(v.getUTCMonth()+1).padStart(2,'0') + '/' +
-           String(v.getUTCFullYear()).slice(-2);
+    return String(v.getDate()).padStart(2,'0') + '/' +
+           String(v.getMonth()+1).padStart(2,'0') + '/' +
+           String(v.getFullYear()).slice(-2);
   }
 
   const s = v.toString().trim();
   if (!s) return 'Unspecified';
 
-  // ISO string: "2025-04-02T00:00:00.000Z"
+  // ISO datetime string: "2025-04-02T00:00:00.000Z" or "2025-04-02"
   const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (iso) { return iso[3] + '/' + iso[2] + '/' + iso[1].slice(-2); }
+  if (iso) {
+    return iso[3] + '/' + iso[2] + '/' + iso[1].slice(-2);
+  }
 
   // Already dd/mm/yy or dd/mm/yyyy
   const ddmmyy = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
@@ -1301,14 +1362,13 @@ function formatDate(v) {
     return d.padStart(2,'0') + '/' + m.padStart(2,'0') + '/' + y.slice(-2);
   }
 
-  // Serial as string
+  // Excel serial number (fallback)
   if (/^\d{4,5}$/.test(s)) {
-    const ms = Math.round((parseFloat(s) - 25569) * 86400 * 1000);
-    const d = new Date(ms);
+    const d = new Date(Math.round((parseFloat(s) - 25569) * 86400 * 1000));
     if (!isNaN(d.getTime())) {
-      return String(d.getUTCDate()).padStart(2,'0') + '/' +
-             String(d.getUTCMonth()+1).padStart(2,'0') + '/' +
-             String(d.getUTCFullYear()).slice(-2);
+      return String(d.getDate()).padStart(2,'0') + '/' +
+             String(d.getMonth()+1).padStart(2,'0') + '/' +
+             String(d.getFullYear()).slice(-2);
     }
   }
 
@@ -2671,6 +2731,43 @@ function exportDesigCSV() {
   a.download = 'cost_by_designation.csv'; a.click();
 }
 
+
+/* ── CSV PARSER ── */
+function parseCSV(text) {
+  const lines = text.split('\n');
+  const result = [];
+  for (let i = 0; i < lines.length; i++) {
+    const row = [];
+    let col = '', inQ = false;
+    for (let j = 0; j < lines[i].length; j++) {
+      const ch = lines[i][j];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { row.push(col.trim()); col = ''; }
+      else { col += ch; }
+    }
+    row.push(col.trim());
+    if (row.some(v => v !== '')) result.push(row);
+  }
+  return result;
+}
+
+function csvToRows(text) {
+  // Returns array of arrays (like sheet_to_json with header:1)
+  return parseCSV(text);
+}
+
+function csvToObjects(text) {
+  // Returns array of objects (like sheet_to_json without header)
+  const rows = parseCSV(text);
+  if (rows.length < 2) return [];
+  const headers = rows[0];
+  return rows.slice(1).map(row => {
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = row[i] || ''; });
+    return obj;
+  });
+}
+
 const DRIVE_FOLDER_ID = '1sR8Z8FdXCbP-eizNRmr166ageAjAdhQa';
 
 async function loadFromDrive() {
@@ -2684,22 +2781,21 @@ async function loadFromDrive() {
 
   try {
     const fileName = 'Consolidated_Report_-_Apr_25.xlsx';
-    // Direct raw GitHub URL — no CORS, no auth, always latest
-    const rawUrl = `https://raw.githubusercontent.com/lehs-dashboard/lehs-reports/main/${fileName}`;
+    const rawUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFf41XPNfMddoWRVnNaZDapO60NwQGK8HCuDGF4YAWe-xbb9fgAJfGAJ25Wyx7zA/pub?output=csv';
 
     if (statusEl) statusEl.textContent = '';
     loadingText.textContent = 'Loading…';
 
     const resp = await fetch(rawUrl);
-    if (!resp.ok) throw new Error(`Download failed (${resp.status}). The file may not have been pushed to GitHub yet — please upload manually.`);
+    if (!resp.ok) throw new Error(`Download failed (${resp.status}). Please check Google Sheets publish settings.`);
 
-    const arrayBuffer = await resp.arrayBuffer();
-    if (arrayBuffer.byteLength < 5000) throw new Error('File too small — something went wrong. Please upload manually.');
+    const csvText = await resp.text();
+    if (csvText.length < 100) throw new Error('File too small — something went wrong.');
 
     loadingText.textContent = 'Loading…';
     if (statusEl) statusEl.textContent = '';
     const savedDF = Object.assign({}, dateFilter); // preserve date filter across refresh
-    parseArrayBuffer(arrayBuffer, fileName);
+    parseCSVData(csvText, fileName);
     // Restore date filter after re-init (parseArrayBuffer → initDashboard resets filtered)
     if (savedDF.fromMK || savedDF.toMK || savedDF.from || savedDF.to) {
       dateFilter = savedDF;
@@ -2799,7 +2895,7 @@ window.addEventListener('load', () => {
     </div>
     <div style="margin-top:16px;text-align:center;">
       <div style="font-size:11px;color:#b0aba4;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;">— or —</div>
-      <button onclick="closeUploadModal();loadFromDrive();" style="font-family:'Sora',sans-serif;font-size:13px;font-weight:600;background:#1a6b4a;color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;">↻ Reload from GitHub</button>
+      <button onclick="closeUploadModal();loadFromDrive();" style="font-family:'Sora',sans-serif;font-size:13px;font-weight:600;background:#1a6b4a;color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;">↻ Reload from Drive</button>
     </div>
   </div>
 </div>
@@ -2830,7 +2926,7 @@ window.addEventListener('load', () => {
     <button id="fin-modal-go" onclick="closeFinUploadModal();fin_processBothFiles();" style="display:none;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;background:#c8400c;color:white;border:none;padding:12px;border-radius:8px;cursor:pointer;width:100%;">Generate Financial Statements →</button>
     <div style="text-align:center;">
       <div style="font-size:11px;color:#b0aba4;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;">— or —</div>
-      <button onclick="closeFinUploadModal();fin_loadFromRepo();" style="font-family:'Sora',sans-serif;font-size:13px;font-weight:600;background:#1a6b4a;color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;">↻ Reload from GitHub</button>
+      <button onclick="closeFinUploadModal();fin_loadFromRepo();" style="font-family:'Sora',sans-serif;font-size:13px;font-weight:600;background:#1a6b4a;color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;">↻ Reload from Drive</button>
     </div>
   </div>
 </div>
@@ -2848,7 +2944,7 @@ window.addEventListener('load', () => {
     <div style="background:white;border:1.5px solid #e0d9ce;border-radius:12px;padding:16px 18px;">
       <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:13px;margin-bottom:4px;">☁️ Fetch from Repository</div>
       <div style="font-size:12px;color:#888;margin-bottom:12px;">Loads <code style="background:#f0ebe0;padding:1px 5px;border-radius:4px;">Employee_Mapping.xlsx</code> from your GitHub repo automatically.</div>
-      <button onclick="fetchMappingFromGitHub()" class="btn-export" style="width:100%;text-align:center;">Load from GitHub</button>
+      <button onclick="fetchMappingFromGitHub()" class="btn-export" style="width:100%;text-align:center;">Load from Drive</button>
       <div id="map-github-status" style="font-size:12px;margin-top:8px;min-height:16px;text-align:center;"></div>
     </div>
 
@@ -2915,15 +3011,13 @@ function closeMappingModal() {
 
 async function fetchMappingFromGitHub(silent = false) {
   const statusEl = document.getElementById('map-github-status');
-  if (!silent) { statusEl.style.color = '#888'; statusEl.textContent = '⏳ Fetching from GitHub…'; }
+  if (!silent) { statusEl.style.color = '#888'; statusEl.textContent = '⏳ Fetching from Drive…'; }
   try {
-    const url = 'https://raw.githubusercontent.com/lehs-dashboard/lehs-reports/main/Employee_Mapping.xlsx';
+    const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRjp4sJMDu1HLyUA6tOxsEb3NwDxC5BzNG9malSBQWD9DbEe42jvs0iZKf6odm3BQ/pub?output=csv';
     const resp = await fetch(url);
-    if (!resp.ok) throw new Error('File not found (HTTP ' + resp.status + '). Upload Employee_Mapping.xlsx to your repo.');
-    const arrayBuffer = await resp.arrayBuffer();
-    const wb = XLSX.read(arrayBuffer, { type: 'array' });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const empCsv = await resp.text();
+    const rows = csvToObjects(empCsv);
     const mapping = {};
     rows.forEach(row => {
       const emp = (row['EMPLOYEE/VENDOR'] || row['Employee/Vendor'] || '').toString().trim();
@@ -3092,8 +3186,8 @@ function exportDrilldownCSV() {
 /* ═══════════════════════════════════════════
    CONFIG
 ═══════════════════════════════════════════ */
-const REPO_TB_URL  = 'https://raw.githubusercontent.com/lehs-dashboard/lehs-reports/main/Consol_TB_FY25-26.xlsx';
-const REPO_MAP_URL = 'https://raw.githubusercontent.com/lehs-dashboard/lehs-reports/main/Financials%20Mapping.xlsx';
+const REPO_TB_URL  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR68cl_MEC7LwUMyex3DvfxTT208nwif-1_0uliXJaigY9Dh303omKZs0IxbuPfIg/pub?output=csv';
+const REPO_MAP_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTTwst3AAmYnuHCAfO5XUHoJv8OhlcFvzWkSTAaFG_SuQa-NPbyeKLb7GCKbZQWcg/pub?output=csv';
 const ORG    = 'Wadhwani AI';
 const PERIOD = "FY 2025–26";
 
@@ -3150,16 +3244,20 @@ function fin_checkReady() {
 ═══════════════════════════════════════════ */
 async function fin_loadFromRepo() {
   const s = document.getElementById('ds');
-  s.className = 'drive-status'; s.textContent = 'Fetching files from GitHub…';
-  fin_showLoad('Fetching from lehs-dashboard/lehs-reports…');
+  s.className = 'drive-status'; s.textContent = 'Fetching files from Drive…';
+  fin_showLoad('Fetching from Google Drive…');
   try {
     const [tbRes, mapRes] = await Promise.all([fetch(REPO_TB_URL), fetch(REPO_MAP_URL)]);
     if (!tbRes.ok)  throw new Error('TB fetch failed: HTTP ' + tbRes.status);
     if (!mapRes.ok) throw new Error('Mapping fetch failed: HTTP ' + mapRes.status);
-    tbBuf  = await tbRes.arrayBuffer();
-    mapBuf = await mapRes.arrayBuffer();
-    tbName  = 'Consol_TB_FY25-26.xlsx (GitHub)';
-    mapName = 'Financials Mapping.xlsx (GitHub)';
+    const [tbCsv, mapCsv] = await Promise.all([tbRes.text(), mapRes.text()]);
+    // Convert CSV text to ArrayBuffer via XLSX
+    const tbWb  = XLSX.read(tbCsv,  { type: 'string' });
+    const mapWb = XLSX.read(mapCsv, { type: 'string' });
+    tbBuf  = XLSX.write(tbWb,  { type: 'array', bookType: 'xlsx' });
+    mapBuf = XLSX.write(mapWb, { type: 'array', bookType: 'xlsx' });
+    tbName  = 'Consol_TB_FY25-26.xlsx (Drive)';
+    mapName = 'Financials Mapping.xlsx (Drive)';
     s.textContent = '';
     fin_processBothFiles();
   } catch(err) {
