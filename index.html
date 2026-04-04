@@ -194,6 +194,13 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
 .pivot-table .grand-total-row td.row-label{background:var(--ink);color:white;font-weight:700;}
 .pivot-table .grand-total-col{font-weight:700;color:var(--accent);}
 .pivot-table .grand-total-row .grand-total-col{background:var(--accent);color:white;}
+.pivot-table .pct-col{font-weight:700;color:var(--accent);font-family:'DM Mono',monospace;text-align:right;}
+.pivot-table .grand-total-row .pct-col{background:var(--accent);color:white;font-weight:700;}
+.pivot-sort-bar{display:flex;align-items:center;gap:6px;}
+.pivot-sort-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.pivot-sort-btn{font-family:'Sora',sans-serif;font-size:12px;font-weight:600;padding:5px 12px;border-radius:6px;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;}
+.pivot-sort-btn:hover{border-color:var(--accent);color:var(--accent);}
+.pivot-sort-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 .pivot-table td.zero{color:#d0ccc6;}
 
 /* ══════════════════════════════════════
@@ -495,30 +502,49 @@ body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-
 </div>
 
 <script>
-const _ADMIN_H = 'af693f3455e416fcbf93abada6b65605d1a4fa9dbdbfea9bee5981ab403b2602';
-const _USER_H  = 'abc23ba941557fc9ad8379c988db4bf3dab29d41d63f123e9513589476bfd9f1';
+const _SUPER_H  = 'fdb3bcfd3b142e704830b7b7a0a5eab02198ccd5b20525ec3eeba8d14e80e383'; // A@9654345003 — never changes
+let   _ADMIN_H  = 'af693f3455e416fcbf93abada6b65605d1a4fa9dbdbfea9bee5981ab403b2602'; // overridden by GitHub
+let   _USER_H   = 'abc23ba941557fc9ad8379c988db4bf3dab29d41d63f123e9513589476bfd9f1'; // overridden by GitHub
 const _RESTRICTED_TABS = ['tab-vendorpivot', 'tab-personnelpivot', 'tab-financials'];
 
-(function() {
+const _GH_TOKEN = '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';
+const _GH_REPO  = 'lehs-dashboard/lehs-reports';
+const _GH_FILE  = 'passwords.json';
+const _GH_API   = `https://api.github.com/repos/${_GH_REPO}/contents/${_GH_FILE}`;
+
+// Load hashes from GitHub on startup
+(async function initAuth() {
+  try {
+    const r = await fetch(_GH_API, { headers: { Authorization: `Bearer ${_GH_TOKEN}`, Accept: 'application/vnd.github.v3.raw' } });
+    if (r.ok) {
+      const d = await r.json();
+      if (d.admin_h) _ADMIN_H = d.admin_h;
+      if (d.user_h)  _USER_H  = d.user_h;
+    }
+  } catch(e) { /* fallback to hardcoded hashes */ }
+
   const role = sessionStorage.getItem('lehs_role');
-  if (role === 'admin' || role === 'user') {
+  if (role === 'superadmin' || role === 'admin' || role === 'user') {
     document.getElementById('pwd-gate').style.display = 'none';
     if (role === 'user') applyUserRestrictions();
+    if (role === 'superadmin') showSuperAdminBtn();
   }
 })();
 
+function showSuperAdminBtn() {
+  const btn = document.getElementById('btn-manage-pwd');
+  if (btn) btn.style.display = '';
+}
+
 function applyUserRestrictions() {
-  // Hide restricted whole tabs
   _RESTRICTED_TABS.forEach(id => {
     const btn = document.getElementById(id);
     if (btn) btn.style.display = 'none';
     const page = document.getElementById('page-' + id.replace('tab-',''));
     if (page) page.style.display = 'none';
   });
-  // Hide only Cost by Designation inside Personnel Cost Analysis
   const desig = document.getElementById('desig-cost-card');
   if (desig) desig.style.display = 'none';
-  // If currently on a restricted tab, switch to overview
   const active = document.querySelector('.tab-btn.active');
   if (active && _RESTRICTED_TABS.includes(active.id)) switchTab('overview');
 }
@@ -532,7 +558,11 @@ async function pgCheck() {
   const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(input));
   const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,'0')).join('');
 
-  if (hashHex === _ADMIN_H) {
+  if (hashHex === _SUPER_H) {
+    sessionStorage.setItem('lehs_role','superadmin');
+    document.getElementById('pwd-gate').style.display = 'none';
+    showSuperAdminBtn();
+  } else if (hashHex === _ADMIN_H) {
     sessionStorage.setItem('lehs_role','admin');
     document.getElementById('pwd-gate').style.display = 'none';
   } else if (hashHex === _USER_H) {
@@ -551,6 +581,90 @@ async function pgCheck() {
     setTimeout(()=>{card.style.transform='translateX(0)';},300);
   }
 }
+
+/* ── MANAGE PASSWORDS (Super Admin only) ── */
+function openManagePwdModal() {
+  document.getElementById('manage-pwd-modal').style.display = 'flex';
+  document.getElementById('manage-pwd-overlay').style.display = 'block';
+  document.getElementById('mp-admin-cur').value = '';
+  document.getElementById('mp-admin-new').value = '';
+  document.getElementById('mp-admin-con').value = '';
+  document.getElementById('mp-user-new').value = '';
+  document.getElementById('mp-user-con').value = '';
+  document.getElementById('mp-status').textContent = '';
+  document.getElementById('mp-status').className = 'mp-status';
+}
+function closeManagePwdModal() {
+  document.getElementById('manage-pwd-modal').style.display = 'none';
+  document.getElementById('manage-pwd-overlay').style.display = 'none';
+}
+
+async function hashStr(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function savePasswords() {
+  const statusEl = document.getElementById('mp-status');
+  const adminCur = document.getElementById('mp-admin-cur').value;
+  const adminNew = document.getElementById('mp-admin-new').value;
+  const adminCon = document.getElementById('mp-admin-con').value;
+  const userNew  = document.getElementById('mp-user-new').value;
+  const userCon  = document.getElementById('mp-user-con').value;
+
+  // Validate
+  let newAdminH = _ADMIN_H, newUserH = _USER_H;
+
+  if (adminNew || adminCur) {
+    if (!adminCur) { statusEl.className='mp-status mp-err'; statusEl.textContent='Enter current Admin password to change it.'; return; }
+    const curH = await hashStr(adminCur);
+    if (curH !== _ADMIN_H && curH !== _SUPER_H) { statusEl.className='mp-status mp-err'; statusEl.textContent='Current Admin password is incorrect.'; return; }
+    if (!adminNew) { statusEl.className='mp-status mp-err'; statusEl.textContent='Enter a new Admin password.'; return; }
+    if (adminNew !== adminCon) { statusEl.className='mp-status mp-err'; statusEl.textContent='New Admin passwords do not match.'; return; }
+    if (adminNew.length < 6) { statusEl.className='mp-status mp-err'; statusEl.textContent='New Admin password must be at least 6 characters.'; return; }
+    newAdminH = await hashStr(adminNew);
+  }
+
+  if (userNew) {
+    if (userNew !== userCon) { statusEl.className='mp-status mp-err'; statusEl.textContent='New User passwords do not match.'; return; }
+    if (userNew.length < 6) { statusEl.className='mp-status mp-err'; statusEl.textContent='New User password must be at least 6 characters.'; return; }
+    newUserH = await hashStr(userNew);
+  }
+
+  if (newAdminH === _ADMIN_H && newUserH === _USER_H) {
+    statusEl.className='mp-status mp-err'; statusEl.textContent='No changes made.'; return;
+  }
+
+  statusEl.className='mp-status mp-info'; statusEl.textContent='Saving to GitHub…';
+
+  try {
+    // Get current file SHA (needed for update)
+    let sha = null;
+    const getR = await fetch(_GH_API, { headers: { Authorization: `Bearer ${_GH_TOKEN}`, Accept: 'application/vnd.github.v3+json' } });
+    if (getR.ok) { const d = await getR.json(); sha = d.sha; }
+
+    const content = btoa(JSON.stringify({ admin_h: newAdminH, user_h: newUserH }, null, 2));
+    const body = { message: 'Update passwords', content, ...(sha ? { sha } : {}) };
+
+    const putR = await fetch(_GH_API, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${_GH_TOKEN}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!putR.ok) { const e = await putR.json(); throw new Error(e.message); }
+
+    // Update in-memory hashes
+    _ADMIN_H = newAdminH;
+    _USER_H  = newUserH;
+
+    statusEl.className='mp-status mp-ok'; statusEl.textContent='✓ Passwords updated successfully.';
+    setTimeout(closeManagePwdModal, 1800);
+  } catch(e) {
+    statusEl.className='mp-status mp-err'; statusEl.textContent='GitHub error: ' + e.message;
+  }
+}
+
 </script>
 
 
@@ -620,6 +734,7 @@ async function pgCheck() {
     </div>
     <div class="header-right" style="flex-shrink:0;">
       <button class="btn-refresh" id="btn-refresh" onclick="loadFromDrive()" style="display:none">🔄 Refresh</button>
+      <button id="btn-manage-pwd" onclick="openManagePwdModal()" style="display:none;font-size:13px;font-family:'Sora',sans-serif;font-weight:600;background:transparent;color:rgba(255,255,255,.75);border:1.5px solid rgba(255,255,255,.25);padding:7px 14px;border-radius:6px;cursor:pointer;" title="Manage Passwords">🔑 Passwords</button>
       <button class="btn-mapping" onclick="openMappingModal()" title="Update Employee Mapping">👥 Update Mapping</button>
       <button class="btn-new" onclick="openUploadModal()">↑ New File</button>
     </div>
@@ -791,6 +906,11 @@ async function pgCheck() {
             <div class="chart-sub">All amounts in ₹ Crores &nbsp;|&nbsp; Respects all active filters</div>
           </div>
           <div class="table-controls">
+            <div class="pivot-sort-bar">
+              <span class="pivot-sort-label">Sort:</span>
+              <button class="pivot-sort-btn active" id="pivot-sort-alpha" onclick="setPivotSort('pivot','alpha')">A → Z</button>
+              <button class="pivot-sort-btn" id="pivot-sort-total" onclick="setPivotSort('pivot','total')">By Total</button>
+            </div>
             <button class="btn-export" onclick="exportPivotCSV()">⬇ Export CSV</button>
           </div>
         </div>
@@ -815,6 +935,11 @@ async function pgCheck() {
             <div class="chart-sub">Budget Line: <b>Contractual – Consultant/Intern</b> &nbsp;|&nbsp; Amounts in absolute ₹ &nbsp;|&nbsp; Respects all active filters</div>
           </div>
           <div class="table-controls">
+            <div class="pivot-sort-bar">
+              <span class="pivot-sort-label">Sort:</span>
+              <button class="pivot-sort-btn active" id="vendorpivot-sort-alpha" onclick="setPivotSort('vendorpivot','alpha')">A → Z</button>
+              <button class="pivot-sort-btn" id="vendorpivot-sort-total" onclick="setPivotSort('vendorpivot','total')">By Total</button>
+            </div>
             <button class="btn-export" onclick="exportVendorPivotCSV()">⬇ Export CSV</button>
           </div>
         </div>
@@ -838,6 +963,11 @@ async function pgCheck() {
             <div class="chart-sub">Budget Line: <b>Personnel</b> &nbsp;|&nbsp; Amounts in absolute ₹ &nbsp;|&nbsp; Respects all active filters</div>
           </div>
           <div class="table-controls">
+            <div class="pivot-sort-bar">
+              <span class="pivot-sort-label">Sort:</span>
+              <button class="pivot-sort-btn active" id="personnelpivot-sort-alpha" onclick="setPivotSort('personnelpivot','alpha')">A → Z</button>
+              <button class="pivot-sort-btn" id="personnelpivot-sort-total" onclick="setPivotSort('personnelpivot','total')">By Total</button>
+            </div>
             <button class="btn-export" onclick="exportPersonnelPivotCSV()">⬇ Export CSV</button>
           </div>
         </div>
@@ -862,6 +992,11 @@ async function pgCheck() {
             <div class="chart-sub">All Budget Lines &nbsp;|&nbsp; Amounts in absolute ₹ &nbsp;|&nbsp; Respects all active filters</div>
           </div>
           <div class="table-controls">
+            <div class="pivot-sort-bar">
+              <span class="pivot-sort-label">Sort:</span>
+              <button class="pivot-sort-btn active" id="allvendorpivot-sort-alpha" onclick="setPivotSort('allvendorpivot','alpha')">A → Z</button>
+              <button class="pivot-sort-btn" id="allvendorpivot-sort-total" onclick="setPivotSort('allvendorpivot','total')">By Total</button>
+            </div>
             <button class="btn-export" onclick="exportAllVendorPivotCSV()">⬇ Export CSV</button>
           </div>
         </div>
@@ -888,6 +1023,11 @@ async function pgCheck() {
             <div class="chart-sub">Budget Line: Personnel &nbsp;|&nbsp; Amounts in absolute ₹ &nbsp;|&nbsp; Respects all active filters</div>
           </div>
           <div class="table-controls">
+            <div class="pivot-sort-bar">
+              <span class="pivot-sort-label">Sort:</span>
+              <button class="pivot-sort-btn active" id="dept-sort-alpha" onclick="setPivotSort('dept','alpha')">A → Z</button>
+              <button class="pivot-sort-btn" id="dept-sort-total" onclick="setPivotSort('dept','total')">By Total</button>
+            </div>
             <button class="btn-export" onclick="exportDeptCSV()">⬇ Export CSV</button>
           </div>
         </div>
@@ -908,6 +1048,11 @@ async function pgCheck() {
             <div class="chart-sub">Budget Line: Personnel &nbsp;|&nbsp; Amounts in absolute ₹ &nbsp;|&nbsp; Respects all active filters</div>
           </div>
           <div class="table-controls">
+            <div class="pivot-sort-bar">
+              <span class="pivot-sort-label">Sort:</span>
+              <button class="pivot-sort-btn active" id="desig-sort-alpha" onclick="setPivotSort('desig','alpha')">A → Z</button>
+              <button class="pivot-sort-btn" id="desig-sort-total" onclick="setPivotSort('desig','total')">By Total</button>
+            </div>
             <button class="btn-export" onclick="exportDesigCSV()">⬇ Export CSV</button>
           </div>
         </div>
@@ -1091,6 +1236,31 @@ async function pgCheck() {
 let rawData = [], filtered = [], chartInstances = {};
 let currentPage = 1, searchQuery = '', sortField = 'date', sortDir = 1;
 const PAGE_SIZE = 75;
+
+// Pivot sort state: 'alpha' | 'total'  (default alphabetical for all)
+const pivotSortState = {
+  pivot: 'alpha',
+  vendorpivot: 'alpha',
+  personnelpivot: 'alpha',
+  allvendorpivot: 'alpha',
+  dept: 'alpha',
+  desig: 'alpha'
+};
+
+function setPivotSort(table, mode) {
+  pivotSortState[table] = mode;
+  // Toggle button active states
+  const alphaBtn = document.getElementById(table + '-sort-alpha');
+  const totalBtn = document.getElementById(table + '-sort-total');
+  if (alphaBtn) alphaBtn.classList.toggle('active', mode === 'alpha');
+  if (totalBtn) totalBtn.classList.toggle('active', mode === 'total');
+  // Re-render the relevant pivot
+  if (table === 'pivot')          renderPivot();
+  else if (table === 'vendorpivot')    renderVendorPivot();
+  else if (table === 'personnelpivot') renderPersonnelPivot();
+  else if (table === 'allvendorpivot') renderAllVendorPivot();
+  else if (table === 'dept' || table === 'desig') renderPersonnelCostPivot();
+}
 
 // Chart cross-filters: { dimension: Set of selected values }
 let chartFilters = {};
@@ -1828,20 +1998,29 @@ const barLabelPlugin = {
     c.textBaseline = isHorizontal ? 'middle' : 'bottom';
     c.textAlign = isHorizontal ? 'left' : 'center';
 
+    // total of visible bars for % calculation
+    const visibleData = data.datasets[0].data.filter((_, i) => {
+      const bar = ds.data[i];
+      return bar && !bar.hidden;
+    });
+    const chartTotal = visibleData.reduce((s, v) => s + (v || 0), 0);
+
     data.datasets[0].data.forEach((val, i) => {
       const bar = ds.data[i];
       if (!bar || bar.hidden) return;
-      const label = (val / 10000000).toFixed(2) + ' Cr';
+      const cr = (val / 10000000).toFixed(2) + ' Cr';
+      const pct = chartTotal > 0 ? ((val / chartTotal) * 100).toFixed(1) + '%' : '0%';
+      const label = cr + ' (' + pct + ')';
       const tw = c.measureText(label).width;
       const pad = 5;
 
       let lx, ly;
       if (isHorizontal) {
-        lx = bar.x + 6;                // right of bar end
+        lx = bar.x + 6;
         ly = bar.y;
       } else {
         lx = bar.x;
-        ly = bar.y - 5;               // above bar top
+        ly = bar.y - 5;
       }
 
       // pill background
@@ -1875,7 +2054,7 @@ function makeMonthlyBar(id, agg) {
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      layout: { padding: { top: 28 } },
+      layout: { padding: { top: 38 } },
       onClick(evt, elements) {
         if (!elements.length) return;
         toggleChartFilter('month', agg.keys[elements[0].index]);
@@ -1916,7 +2095,7 @@ function makeBarH(id, agg, dim) {
     },
     options: {
       indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-      layout: { padding: { right: 72 } },
+      layout: { padding: { right: 110 } },
       onClick(evt, elements) {
         if (!elements.length) return;
         toggleChartFilter(dim, agg.labels[elements[0].index]);
@@ -2002,6 +2181,7 @@ function makeDoughnut(id, agg, dim) {
   destroyChart(id);
   const ctx = document.getElementById(id).getContext('2d');
   const colors = getPieColors(agg.labels, dim);
+  const total = agg.data.reduce((s, v) => s + v, 0);
   chartInstances[id] = new Chart(ctx, {
     type: 'doughnut',
     data: {
@@ -2017,10 +2197,32 @@ function makeDoughnut(id, agg, dim) {
       plugins: {
         legend: {
           display: true, position: 'right',
-          labels: { font: { family: 'Sora', size: 11 }, color: '#0d0d0d', boxWidth: 12, padding: 10 },
+          labels: {
+            font: { family: 'Sora', size: 11 }, color: '#0d0d0d', boxWidth: 12, padding: 10,
+            generateLabels: chart => chart.data.labels.map((lbl, i) => {
+              const val = chart.data.datasets[0].data[i];
+              const pct = total ? ((val / total) * 100).toFixed(1) : '0.0';
+              const cr = (val / 10000000).toFixed(2);
+              const shortLbl = lbl.length > 20 ? lbl.slice(0, 18) + '…' : lbl;
+              return {
+                text: `${shortLbl} (${cr}Cr ${pct}%)`,
+                fillStyle: chart.data.datasets[0].backgroundColor[i],
+                strokeStyle: chart.data.datasets[0].backgroundColor[i],
+                hidden: false, index: i
+              };
+            })
+          },
           onClick(e, item) { toggleChartFilter(dim, agg.labels[item.index]); }
         },
-        tooltip: { callbacks: { label: c => c.label + ': ' + fmt(c.raw) } }
+        tooltip: {
+          callbacks: {
+            label: c => {
+              const pct = total ? ((c.raw / total) * 100).toFixed(1) : '0.0';
+              const cr = (c.raw / 10000000).toFixed(2);
+              return `${c.label}: ₹${cr} Cr (${pct}%)`;
+            }
+          }
+        }
       }
     }
   });
@@ -2084,11 +2286,14 @@ function renderTable() {
   if (currentPage > pages) currentPage = 1;
   const start = (currentPage - 1) * PAGE_SIZE, slice = rows.slice(start, start + PAGE_SIZE);
 
+  // sum of all visible (post-search, post-filter) rows for % calculation
+  const visibleTotal = rows.reduce((s, r) => s + r.amount, 0);
+
   document.getElementById('table-count').textContent =
     `Showing ${(start + 1).toLocaleString()}–${Math.min(start + PAGE_SIZE, total).toLocaleString()} of ${total.toLocaleString()} records`;
 
-  document.getElementById('table-body').innerHTML = slice.map(r => `
-    <tr>
+  document.getElementById('table-body').innerHTML = slice.map(r => {
+    return `<tr>
       <td style="white-space:nowrap;font-size:12px;color:var(--muted)">${r.date}</td>
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap">${r.voucher}</td>
       <td class="trunc" title="${r.vendor}">${r.vendor}</td>
@@ -2098,8 +2303,8 @@ function renderTable() {
       <td class="trunc" style="font-size:12px;color:var(--muted)" title="${r.budget}">${r.budget}</td>
       <td><span class="badge badge-${r.source.toLowerCase().replace(/\s/g,'')}">${r.source}</span></td>
       <td class="amount-cell">${r.amount.toLocaleString('en-IN')}</td>
-    </tr>
-  `).join('') || `<tr><td colspan="9"><div class="no-data">No records match the current filters.</div></td></tr>`;
+    </tr>`;
+  }).join('') || `<tr><td colspan="9"><div class="no-data">No records match the current filters.</div></td></tr>`;
 
   const pg = document.getElementById('pagination');
   if (pages <= 1) { pg.innerHTML = ''; return; }
@@ -2143,18 +2348,24 @@ function renderPivot() {
 
   // Sort months chronologically
   const months = [...monthSet.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  // Sort budget lines alphabetically (Unspecified last)
-  const budgets = [...budgetSet].sort((a, b) => {
-    if (a === 'Unspecified') return 1;
-    if (b === 'Unspecified') return -1;
-    return a.localeCompare(b);
-  });
 
   // Build pivot map: budget → monthKey → amount
   const pivotMap = {};
   filtered.forEach(r => {
     if (!pivotMap[r.budget]) pivotMap[r.budget] = {};
     pivotMap[r.budget][r.monthKey] = (pivotMap[r.budget][r.monthKey] || 0) + r.amount;
+  });
+
+  // Sort budget lines per sort state (after pivotMap is built so totals are available)
+  const budgets = [...budgetSet].sort((a, b) => {
+    if (a === 'Unspecified') return 1;
+    if (b === 'Unspecified') return -1;
+    if (pivotSortState.pivot === 'total') {
+      const ta = Object.values(pivotMap[a] || {}).reduce((s, v) => s + v, 0);
+      const tb = Object.values(pivotMap[b] || {}).reduce((s, v) => s + v, 0);
+      return tb - ta;
+    }
+    return a.localeCompare(b);
   });
 
   // Column grand totals (per month)
@@ -2172,12 +2383,14 @@ function renderPivot() {
     <th class="row-header">Budget Line Item</th>
     ${months.map(([mk, lbl]) => `<th>${lbl}</th>`).join('')}
     <th class="grand-total-col" style="text-align:right;color:var(--accent);">Grand Total</th>
+    <th class="pct-col">% of Total</th>
   </tr>`;
 
   // BODY
   const tbody = document.getElementById('pivot-body');
   const rowsHtml = budgets.map(budget => {
     const rowTotal = months.reduce((s, [mk]) => s + (pivotMap[budget]?.[mk] || 0), 0);
+    const pct = grandTotal > 0 ? ((rowTotal / grandTotal) * 100).toFixed(1) + '%' : '0%';
     const cells = months.map(([mk]) => {
       const val = pivotMap[budget]?.[mk] || 0;
       const cls = val === 0 ? 'zero' : '';
@@ -2187,6 +2400,7 @@ function renderPivot() {
       <td class="row-label" title="${budget}">${budget}</td>
       ${cells}
       <td class="grand-total-col">${crore(rowTotal)}</td>
+      <td class="pct-col">${pct}</td>
     </tr>`;
   }).join('');
 
@@ -2200,6 +2414,7 @@ function renderPivot() {
       <td class="row-label">Grand Total</td>
       ${colTotalCells}
       <td class="grand-total-col">${crore(grandTotal)}</td>
+      <td class="pct-col">100%</td>
     </tr>`;
 }
 
@@ -2263,8 +2478,15 @@ function renderVendorPivot() {
     pivotMap[r.vendor][r.monthKey] = (pivotMap[r.vendor][r.monthKey] || 0) + r.amount;
   });
 
-  // Sort alphabetically
-  const vendors = [...vendorSet].sort((a, b) => a.localeCompare(b));
+  // Sort vendors per sort state
+  const vendors = [...vendorSet].sort((a, b) => {
+    if (pivotSortState.vendorpivot === 'total') {
+      const ta = Object.values(pivotMap[a] || {}).reduce((s, v) => s + v, 0);
+      const tb = Object.values(pivotMap[b] || {}).reduce((s, v) => s + v, 0);
+      return tb - ta;
+    }
+    return a.localeCompare(b);
+  });
 
   // Column totals
   const colTotals = {};
@@ -2287,11 +2509,13 @@ function renderVendorPivot() {
     <th class="row-header">Vendor Name</th>
     ${months.map(([, lbl]) => `<th>${lbl}</th>`).join('')}
     <th class="grand-total-col" style="text-align:right;color:var(--accent);">Grand Total</th>
+    <th class="pct-col">% of Total</th>
   </tr>`;
 
   // BODY rows
   const rowsHtml = vendors.map(vendor => {
     const rowTotal = months.reduce((s, [mk]) => s + (pivotMap[vendor]?.[mk] || 0), 0);
+    const pct = grandTotal > 0 ? ((rowTotal / grandTotal) * 100).toFixed(1) + '%' : '0%';
     const cells = months.map(([mk]) => {
       const val = pivotMap[vendor]?.[mk] || 0;
       return `<td class="${val === 0 ? 'zero' : ''}">${val === 0 ? '0' : inr(val)}</td>`;
@@ -2300,6 +2524,7 @@ function renderVendorPivot() {
       <td class="row-label" title="${vendor}">${vendor}</td>
       ${cells}
       <td class="grand-total-col">${inr(rowTotal)}</td>
+      <td class="pct-col">${pct}</td>
     </tr>`;
   }).join('');
 
@@ -2310,6 +2535,7 @@ function renderVendorPivot() {
       <td class="row-label">Grand Total</td>
       ${colTotalCells}
       <td class="grand-total-col">${inr(grandTotal)}</td>
+      <td class="pct-col">100%</td>
     </tr>`;
 }
 
@@ -2371,8 +2597,15 @@ function renderPersonnelPivot() {
     pivotMap[key][r.monthKey] = (pivotMap[key][r.monthKey] || 0) + r.amount;
   });
 
-  // Sort alphabetically
-  const employees = [...empSet].sort((a, b) => a.localeCompare(b));
+  // Sort per sort state
+  const employees = [...empSet].sort((a, b) => {
+    if (pivotSortState.personnelpivot === 'total') {
+      const ta = Object.values(pivotMap[a] || {}).reduce((s, v) => s + v, 0);
+      const tb = Object.values(pivotMap[b] || {}).reduce((s, v) => s + v, 0);
+      return tb - ta;
+    }
+    return a.localeCompare(b);
+  });
 
   const colTotals = {};
   months.forEach(([mk]) => {
@@ -2392,10 +2625,12 @@ function renderPersonnelPivot() {
     <th class="row-header">Employee / Vendor</th>
     ${months.map(([, lbl]) => `<th>${lbl}</th>`).join('')}
     <th class="grand-total-col" style="text-align:right;color:var(--accent);">Grand Total</th>
+    <th class="pct-col">% of Total</th>
   </tr>`;
 
   const rowsHtml = employees.map(emp => {
     const rowTotal = months.reduce((s, [mk]) => s + (pivotMap[emp]?.[mk] || 0), 0);
+    const pct = grandTotal > 0 ? ((rowTotal / grandTotal) * 100).toFixed(1) + '%' : '0%';
     const cells = months.map(([mk]) => {
       const val = pivotMap[emp]?.[mk] || 0;
       return `<td class="${val === 0 ? 'zero' : ''}">${val === 0 ? '0' : inr(val)}</td>`;
@@ -2404,6 +2639,7 @@ function renderPersonnelPivot() {
       <td class="row-label" title="${emp}">${emp}</td>
       ${cells}
       <td class="grand-total-col">${inr(rowTotal)}</td>
+      <td class="pct-col">${pct}</td>
     </tr>`;
   }).join('');
 
@@ -2413,6 +2649,7 @@ function renderPersonnelPivot() {
       <td class="row-label">Grand Total</td>
       ${colTotalCells}
       <td class="grand-total-col">${inr(grandTotal)}</td>
+      <td class="pct-col">100%</td>
     </tr>`;
 }
 
@@ -2469,8 +2706,9 @@ function renderAllVendorPivot() {
     pivotMap[r.vendor][r.monthKey] = (pivotMap[r.vendor][r.monthKey] || 0) + r.amount;
   });
 
-  // Sort by grand total descending
+  // Sort per sort state
   const vendors = [...vendorSet].sort((a, b) => {
+    if (pivotSortState.allvendorpivot === 'alpha') return a.localeCompare(b);
     const totA = months.reduce((s, [mk]) => s + (pivotMap[a]?.[mk] || 0), 0);
     const totB = months.reduce((s, [mk]) => s + (pivotMap[b]?.[mk] || 0), 0);
     return totB - totA;
@@ -2494,10 +2732,12 @@ function renderAllVendorPivot() {
     <th class="row-header">Vendor Name</th>
     ${months.map(([, lbl]) => `<th>${lbl}</th>`).join('')}
     <th class="grand-total-col" style="text-align:right;color:var(--accent);">Grand Total</th>
+    <th class="pct-col">% of Total</th>
   </tr>`;
 
   const rowsHtml = vendors.map(vendor => {
     const rowTotal = months.reduce((s, [mk]) => s + (pivotMap[vendor]?.[mk] || 0), 0);
+    const pct = grandTotal > 0 ? ((rowTotal / grandTotal) * 100).toFixed(1) + '%' : '0%';
     const cells = months.map(([mk]) => {
       const val = pivotMap[vendor]?.[mk] || 0;
       return `<td class="${val === 0 ? 'zero' : ''}">${val === 0 ? '0' : inr(val)}</td>`;
@@ -2506,6 +2746,7 @@ function renderAllVendorPivot() {
       <td class="row-label" title="${vendor}">${vendor}</td>
       ${cells}
       <td class="grand-total-col">${inr(rowTotal)}</td>
+      <td class="pct-col">${pct}</td>
     </tr>`;
   }).join('');
 
@@ -2515,6 +2756,7 @@ function renderAllVendorPivot() {
       <td class="row-label">Grand Total</td>
       ${colTotalCells}
       <td class="grand-total-col">${inr(grandTotal)}</td>
+      <td class="pct-col">100%</td>
     </tr>`;
 }
 
@@ -2549,7 +2791,7 @@ function exportAllVendorPivotCSV() {
 /* ═══════════════════════════════════════
    PERSONNEL COST ANALYSIS — DEPT & DESIG
 ═══════════════════════════════════════ */
-function buildPersonnelCostPivot(groupKeyFn, groupLabel) {
+function buildPersonnelCostPivot(groupKeyFn, groupLabel, sortKey) {
   const data = filtered.filter(r => r.budget === PERSONNEL_BUDGET);
 
   const monthSet = new Map();
@@ -2568,6 +2810,11 @@ function buildPersonnelCostPivot(groupKeyFn, groupLabel) {
   const groups = Object.keys(pivotMap).sort((a, b) => {
     if (a === 'Unspecified') return 1;
     if (b === 'Unspecified') return -1;
+    if (pivotSortState[sortKey] === 'total') {
+      const ta = Object.values(pivotMap[a] || {}).reduce((s, v) => s + v, 0);
+      const tb = Object.values(pivotMap[b] || {}).reduce((s, v) => s + v, 0);
+      return tb - ta;
+    }
     return a.localeCompare(b);
   });
 
@@ -2587,7 +2834,7 @@ function renderPersonnelCostPivot() {
   });
 
   // Table 1: By Department
-  const d = buildPersonnelCostPivot(info => info.department, 'Department');
+  const d = buildPersonnelCostPivot(info => info.department, 'Department', 'dept');
   if (d.months.length === 0 || d.groups.length === 0) {
     document.getElementById('dept-pivot-head').innerHTML = '';
     document.getElementById('dept-pivot-body').innerHTML =
@@ -2597,25 +2844,28 @@ function renderPersonnelCostPivot() {
       <th class="row-header">Department</th>
       ${d.months.map(([, lbl]) => `<th>${lbl}</th>`).join('')}
       <th class="grand-total-col" style="text-align:right;color:var(--accent);">Grand Total</th>
+      <th class="pct-col">% of Total</th>
     </tr>`;
     const rowsHtml = d.groups.map(g => {
       const rowTotal = d.months.reduce((s, [mk]) => s + (d.pivotMap[g]?.[mk] || 0), 0);
+      const pct = d.grandTotal > 0 ? ((rowTotal / d.grandTotal) * 100).toFixed(1) + '%' : '0%';
       const cells = d.months.map(([mk]) => {
         const val = d.pivotMap[g]?.[mk] || 0;
         return `<td class="${val === 0 ? 'zero' : ''}">${val === 0 ? '0' : d.inr(val)}</td>`;
       }).join('');
-      return `<tr class="dept-row" data-dept="${g.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"><td class="row-label" title="Click to see Grant ID breakdown">${g}</td>${cells}<td class="grand-total-col">${d.inr(rowTotal)}</td></tr>`;
+      return `<tr class="dept-row" data-dept="${g.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"><td class="row-label" title="Click to see Grant ID breakdown">${g}</td>${cells}<td class="grand-total-col">${d.inr(rowTotal)}</td><td class="pct-col">${pct}</td></tr>`;
     }).join('');
     const colTotalCells = d.months.map(([mk]) => `<td>${d.inr(d.colTotals[mk])}</td>`).join('');
     document.getElementById('dept-pivot-body').innerHTML = rowsHtml + `
       <tr class="grand-total-row">
         <td class="row-label">Grand Total</td>${colTotalCells}
         <td class="grand-total-col">${d.inr(d.grandTotal)}</td>
+        <td class="pct-col">100%</td>
       </tr>`;
   }
 
   // Table 2: By Designation
-  const e = buildPersonnelCostPivot(info => info.designation, 'Designation');
+  const e = buildPersonnelCostPivot(info => info.designation, 'Designation', 'desig');
   if (e.months.length === 0 || e.groups.length === 0) {
     document.getElementById('desig-pivot-head').innerHTML = '';
     document.getElementById('desig-pivot-body').innerHTML =
@@ -2625,26 +2875,29 @@ function renderPersonnelCostPivot() {
       <th class="row-header">Designation</th>
       ${e.months.map(([, lbl]) => `<th>${lbl}</th>`).join('')}
       <th class="grand-total-col" style="text-align:right;color:var(--accent);">Grand Total</th>
+      <th class="pct-col">% of Total</th>
     </tr>`;
     const rowsHtml = e.groups.map(g => {
       const rowTotal = e.months.reduce((s, [mk]) => s + (e.pivotMap[g]?.[mk] || 0), 0);
+      const pct = e.grandTotal > 0 ? ((rowTotal / e.grandTotal) * 100).toFixed(1) + '%' : '0%';
       const cells = e.months.map(([mk]) => {
         const val = e.pivotMap[g]?.[mk] || 0;
         return `<td class="${val === 0 ? 'zero' : ''}">${val === 0 ? '0' : e.inr(val)}</td>`;
       }).join('');
-      return `<tr><td class="row-label" title="${g}">${g}</td>${cells}<td class="grand-total-col">${e.inr(rowTotal)}</td></tr>`;
+      return `<tr><td class="row-label" title="${g}">${g}</td>${cells}<td class="grand-total-col">${e.inr(rowTotal)}</td><td class="pct-col">${pct}</td></tr>`;
     }).join('');
     const colTotalCells = e.months.map(([mk]) => `<td>${e.inr(e.colTotals[mk])}</td>`).join('');
     document.getElementById('desig-pivot-body').innerHTML = rowsHtml + `
       <tr class="grand-total-row">
         <td class="row-label">Grand Total</td>${colTotalCells}
         <td class="grand-total-col">${e.inr(e.grandTotal)}</td>
+        <td class="pct-col">100%</td>
       </tr>`;
   }
 }
 
 function exportDeptCSV() {
-  const d = buildPersonnelCostPivot(info => info.department, 'Department');
+  const d = buildPersonnelCostPivot(info => info.department, 'Department', 'dept');
   const header = ['Department', ...d.months.map(([, lbl]) => lbl), 'Grand Total'];
   const dataRows = d.groups.map(g => {
     const rowTotal = d.months.reduce((s, [mk]) => s + (d.pivotMap[g]?.[mk] || 0), 0);
@@ -2658,7 +2911,7 @@ function exportDeptCSV() {
 }
 
 function exportDesigCSV() {
-  const e = buildPersonnelCostPivot(info => info.designation, 'Designation');
+  const e = buildPersonnelCostPivot(info => info.designation, 'Designation', 'desig');
   const header = ['Designation', ...e.months.map(([, lbl]) => lbl), 'Grand Total'];
   const dataRows = e.groups.map(g => {
     const rowTotal = e.months.reduce((s, [mk]) => s + (e.pivotMap[g]?.[mk] || 0), 0);
@@ -2781,6 +3034,63 @@ window.addEventListener('load', () => {
 </script>
 
 <!-- ══ MAPPING MODAL ══ -->
+<!-- ══ MANAGE PASSWORDS MODAL (Super Admin only) ══ -->
+<div id="manage-pwd-overlay" onclick="closeManagePwdModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;"></div>
+<div id="manage-pwd-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2001;background:#f5f0e8;border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.25);width:min(92vw,460px);overflow:hidden;flex-direction:column;">
+  <div style="background:var(--ink);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="color:#fff;font-family:'Sora',sans-serif;font-size:15px;font-weight:700;">🔑 Manage Passwords</div>
+    <button onclick="closeManagePwdModal()" style="background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:rgba(255,255,255,.6);padding:0 4px;">×</button>
+  </div>
+  <div style="padding:24px;display:flex;flex-direction:column;gap:20px;overflow-y:auto;max-height:72vh;">
+
+    <!-- Admin Password -->
+    <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px 20px;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;">Admin Password</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase;">Current Admin Password</div>
+          <input id="mp-admin-cur" type="password" placeholder="Enter current admin password" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:7px;font-family:'DM Mono',monospace;font-size:13px;background:var(--paper);outline:none;">
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase;">New Admin Password</div>
+          <input id="mp-admin-new" type="password" placeholder="Enter new admin password" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:7px;font-family:'DM Mono',monospace;font-size:13px;background:var(--paper);outline:none;">
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase;">Confirm New Admin Password</div>
+          <input id="mp-admin-con" type="password" placeholder="Confirm new admin password" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:7px;font-family:'DM Mono',monospace;font-size:13px;background:var(--paper);outline:none;">
+        </div>
+      </div>
+    </div>
+
+    <!-- User Password -->
+    <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px 20px;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent2);margin-bottom:14px;">User Password</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase;">New User Password</div>
+          <input id="mp-user-new" type="password" placeholder="Enter new user password" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:7px;font-family:'DM Mono',monospace;font-size:13px;background:var(--paper);outline:none;">
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase;">Confirm New User Password</div>
+          <input id="mp-user-con" type="password" placeholder="Confirm new user password" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:7px;font-family:'DM Mono',monospace;font-size:13px;background:var(--paper);outline:none;">
+        </div>
+      </div>
+    </div>
+
+    <div id="mp-status" class="mp-status" style="font-size:13px;text-align:center;min-height:18px;font-family:'Sora',sans-serif;"></div>
+
+    <button onclick="savePasswords()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:13px;font-family:'Sora',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s;width:100%;" onmouseover="this.style.background='#a33208'" onmouseout="this.style.background='var(--accent)'">Save Passwords to GitHub</button>
+    <div style="font-size:11px;color:var(--muted);text-align:center;">Leave a section blank to keep its current password. Changes sync to GitHub instantly.</div>
+  </div>
+</div>
+
+<style>
+.mp-status{}
+.mp-err{color:#c8400c;font-weight:600;}
+.mp-ok{color:#1a6b4a;font-weight:600;}
+.mp-info{color:#6b6560;}
+</style>
+
 <div id="map-overlay" onclick="closeMappingModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;"></div>
 
 <!-- ══ EXPENSE UPLOAD MODAL ══ -->
